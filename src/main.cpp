@@ -1,7 +1,14 @@
-#include <utils.h>
+#include <iostream>
+#include "Trie.hpp"
+#include "util.h"
+
+using namespace std;
 
 int main() {
-    //something here
-    
-    return 0;
+    Trie trie(256, 1);
+    // trie.Insert("Beautiful", 0);
+    // trie.Export();
+    trie.Import();
+    cout << "Oh yeah\n";
+    cout << trie.Search("beautiful", 0);
 }
