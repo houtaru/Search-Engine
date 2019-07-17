@@ -1,3 +1,4 @@
-.vscode/
-
 SearchEngine
+bin
+obj
+.vscode
