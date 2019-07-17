@@ -5,15 +5,14 @@
 #include <queue>
 
 Node::Node() {}
-Node::Node(int nChild, int nText) {
+Node::Node(int nChild) {
     child.resize(nChild, nullptr);
-    cntAppear.resize(nText, 0);
 }
 
 Node::~Node() {}
 
-Trie::Trie(int nChild, int nText):nChild(nChild), nText(nText) {
-    root = new Node(nChild, nText);
+Trie::Trie(int nChild):nChild(nChild){
+    root = new Node(nChild);
 }
 
 Trie::~Trie() {}
@@ -21,29 +20,32 @@ Trie::~Trie() {}
 void Trie::Insert(std::string word, int id) {
     Node * p = root;
     for (char c : word) {
-        if (!p -> child[c]) p -> child[c] = new Node(nChild, nText);
+        if (!p -> child[c]) p -> child[c] = new Node(nChild);
         p = p -> child[c];
     }   
-    ++p -> cntAppear[id];
+    ++p -> distribution[id];
 }
 
 int Trie::Search(std::string word, int id) {
     Node * p = root;
     for (char c : word) {
-        std::cerr << c << ' ' << p ->child.size() << ' ' << p ->cntAppear.size() << '\n';
+        std::cerr << c << ' ' << p ->child.size() << ' ' << p -> distribution.size() << '\n';
         if (!p -> child[c]) return 0;
         p = p -> child[c];
     }
-    return p -> cntAppear[id];
+    return p -> distribution[id];
 }
 
-std::vector<int> Trie::Search(std::string word) {
+std::map<int, int> Trie::Search(std::string word) {
     Node * p = root;
     for (char c : word) {
-        if (!p -> child[c]) return std::vector<int>(0);
+        if (!p -> child[c]) {
+            std::map<int, int> zero;
+            return zero;
+        }
         p = p -> child[c];
     }
-    return p -> cntAppear;
+    return p -> distribution;
 }
 
 void Trie::Import() { //Bug
@@ -58,32 +60,44 @@ void Trie::Import() { //Bug
     while (!q.empty()) {
         Node * &p = q.front();
         q.pop();
-        int nChild, nText;
-        fin >> nChild >> nText;
-        if (!nText) continue;
-        p = new Node(nChild, nText);
-        std::cerr << "Sayhi";
-        for (int i = 0; i < nChild; ++i) q.push(p -> child[i]);
-        for (int i = 0; i < nText; ++i) fin >> p -> cntAppear[i];
+        int nChild, activeChild, nText;
+        fin >> nChild >> activeChild >> nText;
+        if (!p) p = new Node(nChild);
+        for (int i = 0; i < activeChild; ++i) {
+            int id;
+            fin >> id;
+            p -> child[id] = new Node(nChild);
+        }
+        for (int i = 0; i < nText; ++i) {
+            int id, val;
+            fin >> id >> val;
+            p -> distribution[id] = val;
+        }
+        for (int i = 0; i < nChild; ++i) if (p -> child[i]) q.push(p -> child[i]);
     }
 }
 
 void Trie::Export() {
-    //system("mkdir Data/");
+    system("mkdir Data/");
     std::ofstream fout("Data/Trie.data");
+    if (!root) {
+        fout << 0 << ' ' << 0 << '\n';
+        return;
+    }
     std::queue<Node *> q;
     q.push(root);
     while (!q.empty()) {
         Node * p = q.front();
         q.pop();
-        if (!p) fout << 0 << ' ' << 0 << '\n';
-        else {
-            fout << p -> child.size() << ' ' << p -> cntAppear.size() << ' ';
-            for (int i = 0; i < p -> cntAppear.size(); ++i) 
-                fout << p -> cntAppear[i] << ' ';
-            fout << '\n';
-            for (int i = 0; i < p -> child.size(); ++i) q.push(p -> child[i]);
+        std::vector<int> ActiveChild;
+        for (int i = 0; i < p -> child.size(); ++i) if (p -> child[i]) {
+            ActiveChild.push_back(i);
         }
+        fout << p -> child.size()  << ' ' << ActiveChild.size() << ' ' << p -> distribution.size() << '\n';
+        for (int id : ActiveChild) fout << id << ' '; fout << '\n';
+        for (auto dist : p -> distribution) fout << dist.first << ' ' << dist.second << ' ';
+        fout << '\n'; 
+        for (int i = 0; i < p -> child.size(); ++i) if (p -> child[i]) q.push(p -> child[i]);
     }
 }
 
