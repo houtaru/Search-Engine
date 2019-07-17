@@ -2,20 +2,21 @@
 #define __TRIE__ 
 
 #include <vector>
+#include <map> 
 struct Node {
     std::vector<Node *> child; 
-    std::vector<int> cntAppear; // number word X appear in text[i]
+    std::map<int, int> distribution; // number word X appear in text[i]
     Node();
-    Node(int nChild, int nText);
+    Node(int nChild);
     ~Node();
 };
 
 class Trie {
 private:
     Node * root;
-    int nChild, nText;
+    int nChild;
 public:
-    Trie(int nChild, int nText);
+    Trie(int nChild);
     ~Trie();
     // Import Trie from file
     void Import();
@@ -26,7 +27,7 @@ public:
     // Return the number of word appear in text[id]
     int Search(std::string word, int id);
     // Return vector cntAppear of word 
-    std::vector<int> Search(std::string word);
+    std::map<int, int> Search(std::string word);
 };
 
 #endif // __TRIE__
