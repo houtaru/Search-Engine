@@ -3,3 +3,6 @@ bin
 obj
 .vscode
 .DS_Store
+data
+TextData
+TextData2

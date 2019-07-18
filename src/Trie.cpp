@@ -19,6 +19,10 @@ Trie::Trie(int nChild):nChild(nChild){
 
 Trie::~Trie() {}
 
+bool Trie::HasText(int id) {
+    return UsedText.count(id);
+}
+
 void Trie::AddText(int idText, std::string text) {
     if (UsedText.count(idText)) {
         std::cerr << "Have add " << idText << "already\n";
@@ -62,7 +66,7 @@ std::map<int, int> Trie::Search(std::string word) {
     return p -> distribution;
 }
 
-void Trie::Import() { //Bug
+void Trie::Import() {
     //system("mkdir Data/");
     std::ifstream fin("Data/Trie.data");
     if (!fin.is_open()) {
@@ -101,9 +105,11 @@ void Trie::Export() {
     }
     std::queue<Node *> q;
     q.push(root);
+    int cnt = 0;
     while (!q.empty()) {
         Node * p = q.front();
         q.pop();
+        if (p -> distribution.size()) ++cnt;
         std::vector<int> ActiveChild;
         for (int i = 0; i < p -> child.size(); ++i) if (p -> child[i]) {
             ActiveChild.push_back(i);
@@ -114,6 +120,7 @@ void Trie::Export() {
         fout << '\n'; 
         for (int i = 0; i < p -> child.size(); ++i) if (p -> child[i]) q.push(p -> child[i]);
     }
+    std::cerr << "Total Node on trie: " << cnt << '\n';
 }
 
 std::vector < std::string > Trie::auto_suggestion(std::string text, int lim) {
