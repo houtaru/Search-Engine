@@ -10,7 +10,7 @@ using namespace std;
 
 struct Ranking{
     vector<int> output(Trie &trie, vector<string> query, int k);
-    double weight_query(Trie &trie, string term, int count, int lenght_vector);
+    double weight_query(Trie &trie, string term, int count);
 };
 
 #endif //__RANKING__
