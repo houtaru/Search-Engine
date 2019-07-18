@@ -1,19 +1,20 @@
-#include <iostream>
 #include <Trie.hpp>
-#include <utils.h>
-
-using namespace std;
+#include <iostream>
 
 int main() {
-    string s; getline(cin, s);
-    for (auto it : tokenizer(s))
-        cout << it << "\n";
-    // Trie trie(256);
-    // // trie.Insert("beautiful", 0);
-    // // trie.Insert("beautifully", 1);
-    // // trie.Export();
-    // trie.Import();
-    // trie.Insert("beautifully", 1);
-    // cout << "Oh yeah\n";
-    // cout << trie.Search("beautifully", 1);
+    Trie ss(200);
+    for (int i = 0; i < 5; ++i) {
+        std::string s;
+        std::cin >> s;
+        ss.Insert(s, 0);
+    }
+
+    int cnt = 5;
+    for (auto it : ss.auto_suggestion("me")) {
+        cnt--;
+        std::cout << it << "\n";
+        if (cnt == 0) break;
+    }
+
+    return 0;
 }

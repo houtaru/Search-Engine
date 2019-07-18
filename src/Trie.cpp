@@ -4,18 +4,30 @@
 #include <fstream>
 #include <queue>
 
-Node::Node() {}
-Node::Node(int nChild) {
+#include <utils.h>
+
+Trie::Node::Node() {}
+Trie::Node::Node(int nChild) {
     child.resize(nChild, nullptr);
 }
 
-Node::~Node() {}
+Trie::Node::~Node() {}
 
 Trie::Trie(int nChild):nChild(nChild){
     root = new Node(nChild);
 }
 
 Trie::~Trie() {}
+
+void Trie::AddText(int idText, std::vector<std::string> words) {
+    if (UsedText.count(idText)) {
+        return;
+    }
+    for (std::string word : words) {
+        Insert(word, idText);
+    }
+    UsedText.insert(idText);
+}
 
 void Trie::Insert(std::string word, int id) {
     Node * p = root;
@@ -101,4 +113,25 @@ void Trie::Export() {
     }
 }
 
+std::vector < std::string > Trie::auto_suggestion(std::string text, int lim) {
+    Node * p = root;
+    for (int w : text) {
+        if (p->child[w] == NULL) return {"null"};
+        p = p->child[w];
+    }
 
+    std::vector < std::string > result;
+
+    std::function<void(Node *, std::string)> suggestion = [&](Node * p, std::string s) {
+        if (p == NULL || result.size() >= lim) return;
+        if (!p->distribution.empty()) {
+            result.push_back(text + s);
+        }
+        for (int i = 0; i < nChild; ++i) if (p->child[i] != NULL) {
+            suggestion(p->child[i], s + (char) i);
+        }
+    };
+    suggestion(p, "");
+
+    return result;
+}
