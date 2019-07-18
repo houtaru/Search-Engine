@@ -1,7 +1,7 @@
 EXE = main
 
 CC = g++
-COMPILER_FLAGS = -std=c++17 -O2 -Wall -w -pedantic 
+COMPILER_FLAGS = -std=c++11 -O2 -Wall -w -pedantic 
 LINKER_FLAGS = -lncurses
 INCLUDEDIR = -I"src/"
 
