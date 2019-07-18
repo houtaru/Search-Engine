@@ -24,6 +24,7 @@ public:
     
     ~Trie();
     
+    bool HasText(int id);
     void AddText(int idText, std::string text);
 
     // Import Trie from file
