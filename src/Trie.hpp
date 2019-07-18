@@ -24,7 +24,7 @@ public:
     
     ~Trie();
     
-    void AddText(int idText, std::vector<std::string> words);
+    void AddText(int idText, std::string text);
 
     // Import Trie from file
     void Import();
