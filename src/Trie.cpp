@@ -17,6 +17,16 @@ Trie::Trie(int nChild):nChild(nChild){
 
 Trie::~Trie() {}
 
+void Trie::AddText(int idText, std::vector<std::string> words) {
+    if (UsedText.count(idText)) {
+        return;
+    }
+    for (std::string word : words) {
+        Insert(word, idText);
+    }
+    UsedText.insert(idText);
+}
+
 void Trie::Insert(std::string word, int id) {
     Node * p = root;
     for (char c : word) {

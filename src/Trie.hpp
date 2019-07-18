@@ -3,6 +3,9 @@
 
 #include <vector>
 #include <map> 
+#include <set>
+#include <util.h>
+
 struct Node {
     std::vector<Node *> child; 
     std::map<int, int> distribution; // number word X appear in text[i]
@@ -15,9 +18,11 @@ class Trie {
 private:
     Node * root;
     int nChild;
+    std::set<int> UsedText;
 public:
     Trie(int nChild);
     ~Trie();
+    void AddText(int idText, std::vector<std::string> words);
     // Import Trie from file
     void Import();
     // Export Trie to file
