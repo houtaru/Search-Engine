@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <map> 
+#include <set>
+#include <util.h>
 
 class Trie {
 private:
@@ -16,10 +18,14 @@ private:
 
     Node * root;
     int nChild;
+    std::set<int> UsedText;
 public:
     Trie(int nChild);
+    
     ~Trie();
     
+    void AddText(int idText, std::vector<std::string> words);
+
     // Import Trie from file
     void Import();
     
