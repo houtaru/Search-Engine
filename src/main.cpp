@@ -1,6 +1,6 @@
 #include <iostream>
-#include "Trie.hpp"
-#include "util.h"
+#include <Trie.hpp>
+#include <utils.h>
 
 using namespace std;
 
