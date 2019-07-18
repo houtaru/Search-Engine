@@ -8,14 +8,16 @@ std::vector < std::string > tokenizer(std::string text, int flag) {
 
         for (auto it : cur) {
             bool ok = true;
+            std::string s;
+            for (char c : it) if (isalnum(c)) s.push_back(c);
             for (auto jt : std::vector <std::string> {"I", "a", "about", "an", "are", "as", "at", "be", "by", "com", "for", "from", "how", "in", "is", "it", "of", "on", "or", "that", "the", "this", "to", "was", "what", "when", "where", "who", "will", "with", "the", "www"})
-                if (it == jt) {
+                if (s == jt) {
                     ok = false;
                     break;
                 }
-            if (ok) result.push_back(it);
+            if (ok && !s.empty()) result.push_back(s);
         }
-    } else {
+    } {
         
     }
     return result;
