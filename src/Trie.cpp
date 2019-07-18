@@ -19,10 +19,12 @@ Trie::Trie(int nChild):nChild(nChild){
 
 Trie::~Trie() {}
 
-void Trie::AddText(int idText, std::vector<std::string> words) {
+void Trie::AddText(int idText, std::string text) {
     if (UsedText.count(idText)) {
+        std::cerr << "Have add " << idText << "already\n";
         return;
     }
+    std::vector<std::string> words = tokenizer(text);
     for (std::string word : words) {
         Insert(word, idText);
     }
@@ -83,6 +85,7 @@ void Trie::Import() { //Bug
         for (int i = 0; i < nText; ++i) {
             int id, val;
             fin >> id >> val;
+            UsedText.insert(id);
             p -> distribution[id] = val;
         }
         for (int i = 0; i < nChild; ++i) if (p -> child[i]) q.push(p -> child[i]);
