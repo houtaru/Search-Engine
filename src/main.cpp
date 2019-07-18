@@ -3,6 +3,7 @@
 #include "utils.h"
 #include <iostream>
 #include <fstream>
+#include <Heap.hpp>
 
 using namespace std;
 
@@ -33,5 +34,4 @@ int main() {
     for (int x : Result) {
         cout << x << ' ';
     }
-    return 0;
 }
