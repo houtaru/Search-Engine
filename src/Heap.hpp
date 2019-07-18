@@ -6,14 +6,14 @@
 using namespace std;
 
 struct Heap{
-    vector<pair<int, int>> HEAP;
+    vector<pair<double, int>> HEAP;
     
     int parent(int i);
     int left(int i);
     int right(int i);
     int size();
     
-    void insert(pair<int, int> x);
+    void insert(pair<double, int> x);
     void heapify(int i, int size_sub);
     vector<int> topk_result(int k);
 };
