@@ -6,7 +6,7 @@ double Ranking::weight_query(Trie &trie, string term, int count) {
     map<int, int> df = trie.Search(term);
     int df_term = df.size();
 
-    return df_term ? (1 + log(count)) * 1.0 * log(1 + nText * 1.0 / df_term) : 0;
+    return df_term ? count * 1.0 * log(nText * 1.0 / df_term) : 0;
 }
 
 vector<int> Ranking::output(Trie &trie, vector<string> query, int k) {
@@ -33,7 +33,7 @@ vector<int> Ranking::output(Trie &trie, vector<string> query, int k) {
         for (auto j : df) {
             //  Compute dot producgt of vector q and vector d
             ++number_terms[j.first];
-            score[j.first] += w_tq * (1 + log(j.second));
+            score[j.first] += w_tq * j.second;
         }
     }
 
