@@ -11,28 +11,39 @@ Trie::Node::Node(int nChild) {
     child.resize(nChild, nullptr);
 }
 
-Trie::Node::~Node() {}
+Trie::Node::~Node() {
+    for (int i = 0; i < child.size(); ++i) delete child[i];
+}
 
 Trie::Trie(int nChild):nChild(nChild){
     root = new Node(nChild);
 }
 
-Trie::~Trie() {}
+Trie::~Trie() {
+    delete root;
+}
 
 bool Trie::HasText(int id) {
     return UsedText.count(id);
 }
 
+int Trie::NumberOfText() {
+    return UsedText.size();
+}
+
+long long Trie::SumSquareLength(int id) {
+    return UsedText[id];
+} 
 void Trie::AddText(int idText, std::string text) {
     if (UsedText.count(idText)) {
         std::cerr << "Have add " << idText << "already\n";
         return;
     }
+    UsedText[idText] = 0;
     std::vector<std::string> words = tokenizer(text);
     for (std::string word : words) {
         Insert(word, idText);
     }
-    UsedText.insert(idText);
 }
 
 void Trie::Insert(std::string word, int id) {
@@ -40,7 +51,9 @@ void Trie::Insert(std::string word, int id) {
     for (char c : word) {
         if (!p -> child[c]) p -> child[c] = new Node(nChild);
         p = p -> child[c];
-    }   
+    }
+    // l^2 -> (l + 1) ^ 2 => Add to UsedText 2l + 1
+    UsedText[id] += p ->distribution[id] * 2 + 1;
     ++p -> distribution[id];
 }
 
@@ -89,7 +102,7 @@ void Trie::Import() {
         for (int i = 0; i < nText; ++i) {
             int id, val;
             fin >> id >> val;
-            UsedText.insert(id);
+            UsedText[id] += 1ll * val * val;
             p -> distribution[id] = val;
         }
         for (int i = 0; i < nChild; ++i) if (p -> child[i]) q.push(p -> child[i]);

@@ -9,6 +9,7 @@
 using namespace std;
 
 struct Ranking{
+    int nText;
     vector<int> output(Trie &trie, vector<string> query, int k);
     double weight_query(Trie &trie, string term, int count);
 };

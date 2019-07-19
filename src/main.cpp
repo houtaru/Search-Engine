@@ -13,7 +13,7 @@ int main() {
     trie.Import();
     cerr << "Importing TRIE takes " << (clock() - stime) / CLOCKS_PER_SEC * 1000 << "ms.\n";
     stime = clock();
-    ifstream fin("TextData/___index.txt");
+    ifstream fin("TextData2/___index.txt");
     string filename;
     int cnt = 0;
     int totalChar = 0;
@@ -23,13 +23,13 @@ int main() {
             ++cnt;
             continue;
         }
-        ifstream data("TextData/" + filename);
+        ifstream data("TextData2/" + filename);
         string st;
         string text;
         while (getline(data, st)) {
             for (char c : st) {
-                if ('A' <= c && c <= 'Z') c += 32;
-                if (('a' <= c && c <= 'z') || ('0' <= c && c <= '9') || c == ' ')
+                // if ('A' <= c && c <= 'Z') c += 32;
+                // if (('a' <= c && c <= 'z') || ('0' <= c && c <= '9') || c == ' ')
                     text.push_back(c);
             }
             text.push_back(' '); 
@@ -45,4 +45,16 @@ int main() {
     cerr << "Exporting TRIE takes " << (clock() - stime) / CLOCKS_PER_SEC * 1000 << "ms.\n";
     stime = clock();
     // cerr << "totalChar : " << totalChar << '\n';
+    // for (auto x : trie.Search("VIETNAM")) {
+    //     cerr << x.first << ' ' << x.second << '\n';
+    // }
+    //exit(0);
+    string query;
+    getline(cin, query);
+    //trie.Export();
+    Ranking ranking;
+    vector<int> Result = ranking.output(trie, tokenizer(query), 3);
+    for (int x : Result) {
+        cout << x << ' ';
+    }
 }
