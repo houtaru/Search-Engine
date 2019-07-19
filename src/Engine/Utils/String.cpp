@@ -1,4 +1,4 @@
-#include <engine/utils/String.hpp>
+#include <Engine/Utils/String.hpp>
 
 const char trim_blanks[] = " \t\r\n";
 
@@ -21,12 +21,22 @@ std::string String::trim(const std::string &str) {
     return ltrim(rtrim(str));
 }
 
-std::vector < std::string > split(const std::string& str, char delim) {
+std::vector < std::string > String::split(const std::string& str, char delim, bool flag) {
     std::stringstream ss(str);          // buffers
     std::string item;                   // current thing
     std::vector < std::string > elements;  // all things
 
-    while (std::getline(ss, item, delim))
-        elements.push_back(item);
+    while (std::getline(ss, item, delim)) {
+        std::string res = item;
+        if (!flag) {
+            res = "";
+            for (int i = 0; i < item.size(); ++i) if (isalnum(item[i])) {
+                res += item[i];
+            } else if (std::string("-$#*").find(item[i]) != std::string::npos) {
+                res += item[i];
+            }
+        }
+        elements.push_back(res);
+    }
     return elements;
 }

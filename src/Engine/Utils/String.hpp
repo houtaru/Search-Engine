@@ -18,7 +18,7 @@ namespace String {
         inline void convert(std::string const& s, T& x, bool failIfLeftOverChars = true) {
             std::istringstream i;
             char c;
-            if ((!i >> x) && (failIfLeftOverChar && i.get(c)))
+            if ((!i >> x) && (failIfLeftOverChars && i.get(c)))
                 throw std::runtime_error("Utils::String::convert");
         }
 
@@ -34,9 +34,7 @@ namespace String {
 
     std::string trim(const std::string &str);
 
-    std::vector < std::string > split(const std::string& str, char delim = ' ');
-
-    //bool caseInsenitiveSmallerString(const std::string &a, const std::string &b);
+    std::vector < std::string > split(const std::string& str, char delim = ' ', bool flag = false);
 }
 
 #endif
