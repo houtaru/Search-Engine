@@ -17,7 +17,7 @@ vector<int> Ranking::output(Trie &trie, vector<string> query, int k) {
         MAP[query[i]]++;
     double length_query = 0;
     for (auto i : MAP)
-        length_query += i.second * i.second * 1.0;
+        length_query += i.second * i.second;
     length_query = sqrt(length_query);
     
     //  Compute cosine between vector q (query) and vector d (document) ~ Score of documents
@@ -33,7 +33,7 @@ vector<int> Ranking::output(Trie &trie, vector<string> query, int k) {
         for (auto j : df) {
             //  Compute dot producgt of vector q and vector d
             ++number_terms[j.first];
-            score[j.first] += w_tq * j.second;
+            score[j.first] += w_tq * j.second * 1.0;
         }
     }
 
