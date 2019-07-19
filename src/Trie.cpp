@@ -6,6 +6,14 @@
 
 #include <utils.h>
 
+void Trie::Try(Node *p, std::string s) {
+    if (p -> distribution.size()) {
+        system((s + " >> log").c_str());
+    }
+    for (int i = 0; i < nChild; ++i) if (p->child[i] != NULL)
+        Try(p->child[i], s + char(i));
+}
+
 Trie::Node::Node() {}
 Trie::Node::Node(int nChild) {
     child.resize(nChild, nullptr);

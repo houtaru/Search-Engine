@@ -49,6 +49,7 @@ int main() {
     //     cerr << x.first << ' ' << x.second << '\n';
     // }
     //exit(0);
+    trie.Try(trie.root, "");
     string query;
     getline(cin, query);
     //trie.Export();

@@ -16,11 +16,11 @@ private:
         ~Node();
     };
 
-    Node * root;
     int nChild;
     // Store sum square of words
     std::map<int, long long> UsedText;
 public:
+    Node * root;
     Trie(int nChild);
     
     ~Trie();
@@ -42,6 +42,7 @@ public:
     // Return the number of word appear in text[id]
     int Search(std::string word, int id);
     
+    void Try(Node * p, std::string s);
     // Return vector cntAppear of word 
     std::map<int, int> Search(std::string word);
 
