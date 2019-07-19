@@ -111,12 +111,22 @@ void Trie::Import() {
             int id, val;
             fin >> id >> val;
             UsedText[id] += 1ll * val * val;
+         //   ++cnt;
             p -> distribution[id] = val;
         }
         for (int i = 0; i < nChild; ++i) if (p -> child[i]) q.push(p -> child[i]);
     }
+    //std::cout << "All words = " << cnt << '\n';
 }
 
+void Trie::Try(Node * p, std::string s) {
+    if (p -> distribution.size()) {
+        system(("echo " + s + " >> log.txt").c_str());
+    }
+    for (int i = 0; i < nChild; ++i) if (p -> child[i]) {
+        Try(p -> child[i], s + char(i));
+    }
+}
 void Trie::Export() {
     system("mkdir Data/");
     std::ofstream fout("Data/Trie.data");
@@ -165,4 +175,70 @@ std::vector < std::string > Trie::auto_suggestion(std::string text, int lim) {
     suggestion(p, "");
 
     return result;
+}
+
+
+Aho_Corasick::Node::Node() {}
+Aho_Corasick::Node::Node(int nChild, Node * par, int par_id): par(par), par_id(par_id) {
+    child.resize(nChild, nullptr);
+    go.resize(nChild, nullptr);
+}
+
+Aho_Corasick::Node::~Node() {}
+
+void Aho_Corasick::Insert(std::string word) {
+    Node * p = root;
+    for (char c : word) {
+        if (!p -> child[c]) p -> child[c] = new Node(nChild, p, c);
+        p = p -> child[c];
+    }   
+    p -> cntLeaf++;
+}
+
+Aho_Corasick::Node * Aho_Corasick::Go(Node * v, int id) {
+    if (!v -> go[id]) {
+        if (v -> child[id]) {
+            v -> go[id] = v -> child[id];
+        } else {
+            v -> go[id] = (v == root ? root : Go(GetLink(v), id));
+        }
+    }
+    return v -> go[id];
+}
+
+Aho_Corasick::Node * Aho_Corasick::GetLink(Node * v) {
+    if (!v -> link) {
+        if (v == root || v -> par == root) v -> link = root;
+        else {
+            v -> link = Go(GetLink(v -> par), v -> par_id);
+        }
+    }
+    return v -> link;
+}
+
+int Aho_Corasick::Value(std::string text) {
+    Node * p = root;
+    int ans = 0;
+    for (char c : text) {
+        p = Go(p, c);
+        ans += p ->cntLeaf;
+    }
+    return ans;
+}
+
+void Aho_Corasick::BuildSumSuffix(Node * p) {
+    if (p == nullptr) p = root;
+    Node * link = GetLink(p);
+    p -> cntLeaf += link -> cntLeaf;
+    for (int i = 0; i < nChild; ++i) if (p -> child[i])
+        BuildSumSuffix(p -> child[i]);
+}
+
+
+Aho_Corasick::Aho_Corasick(int nChild):nChild(nChild){
+    root = new Node(nChild, nullptr, -1);
+}
+
+Aho_Corasick::~Aho_Corasick() {
+    delete root;
 }
