@@ -13,7 +13,7 @@ int main() {
     trie.Import();
     cerr << "Importing TRIE takes " << (clock() - stime) / CLOCKS_PER_SEC * 1000 << "ms.\n";
     stime = clock();
-    ifstream fin("TextData2/___index.txt");
+    ifstream fin("TextData/___index.txt");
     string filename;
     int cnt = 0;
     int totalChar = 0;
@@ -23,7 +23,7 @@ int main() {
             ++cnt;
             continue;
         }
-        ifstream data("TextData2/" + filename);
+        ifstream data("TextData/" + filename);
         string st;
         string text;
         while (getline(data, st)) {
