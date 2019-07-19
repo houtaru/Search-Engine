@@ -8,7 +8,7 @@
 using namespace std;
 
 int main() {
-    /* double stime = clock();
+     double stime = clock();
     Trie trie(256);
     trie.Import();
     cerr << "Importing TRIE takes " << (clock() - stime) / CLOCKS_PER_SEC * 1000 << "ms.\n";
@@ -58,27 +58,27 @@ int main() {
     for (int x : Result) {
         cout << x << "\n";
     }
-    cerr << "\nSearching TRIE takes " << (clock() - stime) / CLOCKS_PER_SEC * 1000 << "ms.\n";*/
+    cerr << "\nSearching TRIE takes " << (clock() - stime) / CLOCKS_PER_SEC * 1000 << "ms.\n";
 
-    Trie trie(256);
-    trie.Import();
+    // Trie trie(256);
+    // trie.Import();
 
-    vector<string> nameFile;
-    string sub;
-    ifstream fin("TextData2/___index.txt");
-    while (getline(fin, sub)) {
-        nameFile.push_back(sub);
-    }
-    fin.close();
+    // vector<string> nameFile;
+    // string sub;
+    // ifstream fin("TextData2/___index.txt");
+    // while (getline(fin, sub)) {
+    //     nameFile.push_back(sub);
+    // }
+    // fin.close();
 
-    string query;
-    getline(cin, query);
+    // string query;
+    // getline(cin, query);
 
-    Ranking ranking;
-    vector<int> Result = ranking.output(trie, tokenizer(query), 5);
-    cout << endl;
-    for (int i : Result)
-        cout << nameFile[i] << endl;
+    // Ranking ranking;
+    // vector<int> Result = ranking.output(trie, tokenizer(query), 5);
+    // cout << endl;
+    // for (int i : Result)
+    //     cout << nameFile[i] << endl;
     
     return 0;
 }
