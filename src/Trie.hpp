@@ -18,13 +18,16 @@ private:
 
     Node * root;
     int nChild;
-    std::set<int> UsedText;
+    // Store sum square of words
+    std::map<int, long long> UsedText;
 public:
     Trie(int nChild);
     
     ~Trie();
     
     bool HasText(int id);
+    int NumberOfText();
+    long long SumSquareLength(int id);
     void AddText(int idText, std::string text);
 
     // Import Trie from file
