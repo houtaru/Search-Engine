@@ -1,26 +1,51 @@
-EXE = main
+# make all 			Build the package
+# make run			Builds and runs the program
+# make clean 		Cleans results of the building and process
 
-CC = g++
-COMPILER_FLAGS = -std=c++11 -O2 -Wall -w -pedantic 
-LINKER_FLAGS = -lncurses
-INCLUDEDIR = -I"src/"
+# Build Info
+EXE			= main
+CDEBUG		= -O2
+CXXFLAGS	= $(CDEBUG) -Wall -Wextra $(CFLAGS_PLATFORM) -std=c++11 -O2 -w
+LDFLAGS		= -lncurses $(LDFLAGS_PLATFORM)
+INCLUDEDIRS = -I"src/"
+LIBSDIR		=
 
+# Project source files
+CFILES = $(shell find src -type f -name '*.c')
 CXXFILES = $(shell find src -type f -name '*.cpp')
-OBJECTS  = $(CXXFILES:src/%.cpp=obj/%.o)
+OBJECTS = $(CFILES:.c=.o) \
+		  $(CXXFILES:.cpp=.o)
 
+# Verbose mode check
+ifdef V
+MUTE =
+VTAG = -v
+else
+MUTE = @
+endif
+
+# Make targets
 all: dirs $(EXE)
-
-run: 
-	bin/./$(EXE)
+	# Build sucessful!
 
 $(EXE): $(OBJECTS)
-	$(CC) $(OBJECTS) -g -o bin/$(EXE) $(LINKER_FLAGS) $(INCLUDEDIR) $(COMPILER_FLAGS)
+	# Linking...
+	$(MUTE)$(CXX) $(OBJECTS) -o bin/$(EXE) $(LIBSDIR) $(LDFLAGS)
 
-obj/%.o: src/%.cpp
-	$(CC) $< -g -c -o $@ $(INCLUDEDIR) $(COMPILER_FLAGS)
+src/%.o: src/%.cpp
+	# Compiling $<
+	$(MUTE)$(CXX) $(CXXFLAGS) $(CDEBUG) $< -c -o $@ $(INCLUDEDIRS)
+
+run: all
+	# Running...
+	$(MUTE)./bin/$(EXE)
+
+clean:
+	# Cleaning object files...
+	$(MUTE)rm $(VTAG) -f $(OBJECTS)	
+	$(MUTE)rm $(VTAG) -f bin/$(EXE)
 
 dirs:
-	mkdir -p bin	
-	mkdir -p obj
-clean:
-	rm -f $(OBJECTS)
+	$(MUTE)mkdir -p bin
+
+.PHONY: clean dirs

@@ -43,6 +43,7 @@ public:
     // Return the number of word appear in text[id]
     int Search(std::string word, int id);
     
+    void Try(Node * p, std::string s);
     // Return vector cntAppear of word 
     std::map<int, int> Search(std::string word);
 
@@ -80,4 +81,10 @@ public:
     // Find the number appear all words in text
     int Value(std::string text);
 };
+<<<<<<< HEAD
 #endif // __TRIE__
+=======
+#endif // __TRIE__
+
+
+>>>>>>> a8bf8ba8dace72f7e817427089780924eaa34cd5
