@@ -1,6 +1,4 @@
 #include <Frontend.hpp>
-
-<<<<<<< HEAD
 void Frontend::draw_rectangle(int x1, int y1, int height, int width) {
     attron(A_BOLD);
     int x2 = x1 + height, y2 = y1 + width;
@@ -39,8 +37,6 @@ void Frontend::draw_logo(int x1, int x2) {  //  x1, x2 is the coordinate accordi
     refresh();
     attroff(A_BOLD);
 }
-
-
 void get_query(char *input_search) {
     echo();
     getstr(input_search);
@@ -274,5 +270,4 @@ void Frontend::main_scr() {
     }
     endwin();
 }
-=======
->>>>>>> a8bf8ba8dace72f7e817427089780924eaa34cd5
+

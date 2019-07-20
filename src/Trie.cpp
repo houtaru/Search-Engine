@@ -1,4 +1,4 @@
-#include "Trie.hpp"
+#include <Trie.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -117,15 +117,6 @@ void Trie::Import() {
         for (int i = 0; i < nChild; ++i) if (p -> child[i]) q.push(p -> child[i]);
     }
     //std::cout << "All words = " << cnt << '\n';
-}
-
-void Trie::Try(Node * p, std::string s) {
-    if (p -> distribution.size()) {
-        system(("echo " + s + " >> log.txt").c_str());
-    }
-    for (int i = 0; i < nChild; ++i) if (p -> child[i]) {
-        Try(p -> child[i], s + char(i));
-    }
 }
 void Trie::Export() {
     system("mkdir Data/");

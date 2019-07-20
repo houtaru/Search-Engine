@@ -1,8 +1,10 @@
-#include <Frontend.hpp>
-
+#include "utils.h"
+using namespace std;
 int main() {
-    Frontend frontend;
-    frontend.main_scr();
+    string s="+-*" ;
+    vector<string> k=tokenizer(s,0) ; 
+    preprocess_data(k) ; 
+    for (auto i :k)
+       cout << i <<endl ; 
 
-    return 0;
 }
