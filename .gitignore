@@ -1,6 +1,5 @@
 SearchEngine
 bin
-obj
 .vscode
 .DS_Store
 data
@@ -9,3 +8,4 @@ TextData
 TextData2
 main.cpp
 makefile
+*.o
