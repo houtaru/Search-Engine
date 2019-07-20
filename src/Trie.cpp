@@ -119,14 +119,6 @@ void Trie::Import() {
     //std::cout << "All words = " << cnt << '\n';
 }
 
-void Trie::Try(Node * p, std::string s) {
-    if (p -> distribution.size()) {
-        system(("echo " + s + " >> log.txt").c_str());
-    }
-    for (int i = 0; i < nChild; ++i) if (p -> child[i]) {
-        Try(p -> child[i], s + char(i));
-    }
-}
 void Trie::Export() {
     system("mkdir Data/");
     std::ofstream fout("Data/Trie.data");
