@@ -92,17 +92,17 @@ namespace Colors {
     // It has the effect of makeing all subsequent prints having this color pair.
     //
     // @note Default of #window is ncurses default window
-    void activate(WINDOW * window = stdscr, Color& foregound, Color& background);
+    void activate(WINDOW * window, Color& foregound, Color& background);
     
     // Activates the color pair #color on a ncurses #window
     // @note Default of #window is ncurses default window
     // 
     // @see Colors::activate()
-    void pairActivate(WINDOW * window = stdscr, ColorPair& color);
+    void pairActivate(WINDOW * window, ColorPair& color);
     
     // De-actives the color pair #color on a ncurses #window
     // @note Default of #window is ncurses default window
-    void pairDeactive(WINDOW *window = stdscr, ColorPair& color);
+    void pairDeactive(WINDOW *window, ColorPair& color);
 }
 
 #endif

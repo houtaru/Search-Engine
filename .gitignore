@@ -7,4 +7,5 @@ Data
 TextData
 TextData2
 main.cpp
+.directory
 *.o
