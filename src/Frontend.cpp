@@ -1,6 +1,5 @@
 #include <Frontend.hpp>
 
-<<<<<<< HEAD
 void Frontend::draw_rectangle(int x1, int y1, int height, int width) {
     attron(A_BOLD);
     int x2 = x1 + height, y2 = y1 + width;
@@ -62,19 +61,57 @@ void clear_scr(int x1, int x2) {
 }
 
 
-void view_document(string name_document) {
+void view_document(vector<string> query, string name_document) {
     clear_scr(12, LINES - 10);
     attron(A_BOLD);
 
-    attron(A_UNDERLINE); 
-    mvprintw(13, 70, name_document.c_str());
-    attroff(A_UNDERLINE);
+    mvprintw(13, (COLS - name_document.size())/2, name_document.c_str());
 
     attron(A_REVERSE);
     mvprintw(LINES-8 + 1, (COLS - 9)/2 + 1, "  BACK  ");
     attroff(A_REVERSE);
 
     attroff(A_BOLD);
+
+    ifstream fin("TextData2/" + name_document);
+    vector<string> content;
+    string sub;
+    while (fin >> sub)
+        content.push_back(sub);
+    fin.close();
+
+    //  row: current row
+    //  length_row: the current length on the current row
+    //  index: current index in content
+    //  position: next position to print content[i]
+    int row = 1, length_row = 0, position = 54, index = 0;
+    while (index < content.size() && row < 23) {
+        length_row = position + content[index].size()+1 - 49;
+
+        if (length_row > 100) {
+            ++row;
+            if (row >= 23) 
+                break;
+            length_row = 0;
+            position = 49;
+        }
+
+        bool compare = false;
+        //  Compare content[index] to query. If it is, bolding it
+        for (auto i : tokenizer(content[index]))
+            for (auto j : query)
+                if (i.compare(j) == 0) {
+                    compare = true;
+                    attron(A_BOLD); attron(A_REVERSE);
+                    break;
+                }
+        mvprintw(15 + row, position, content[index].c_str());
+        position += content[index].size() + 1;
+        ++index;
+        if (compare) {
+            attroff(A_BOLD); attroff(A_REVERSE);
+        }
+    }
 
     while (true) {
         int input = getch();
@@ -151,19 +188,19 @@ void Frontend::search_scr(Trie &trie, char *input_search) {
 
                 switch (current_pointer) {
                     case 0:
-                        view_document(result[0]);
+                        view_document(query, result[0]);
                         break;
                     case 1:
-                        view_document(result[1]);
+                        view_document(query, result[1]);
                         break;
                     case 2:
-                        view_document(result[2]);
+                        view_document(query, result[2]);
                         break;
                     case 3:
-                        view_document(result[3]);
+                        view_document(query, result[3]);
                         break;
                     case 4:
-                        view_document(result[4]);
+                        view_document(query, result[4]);
                         break;
                 }
             }
@@ -178,15 +215,7 @@ void Frontend::search_scr(Trie &trie, char *input_search) {
 }
 
 
-void Frontend::main_scr() {
-    Trie trie(256);
-    trie.Import();
-
-    initscr();
-    noecho();
-    cbreak();
-    keypad(stdscr, TRUE);
-
+void Frontend::main_scr(Trie &trie) {
     enum {
     SEARCH_BAR,
     SEARCH_BUTTON,
@@ -201,7 +230,6 @@ void Frontend::main_scr() {
     };
     int current_pointer = 0, size = 4;   //  size is the number of rectangles
     while (true) {
-        draw_rectangle(0, 0, LINES - 1, COLS - 1);  //  Draw main window
         draw_logo(-2, 0);
         draw_rectangle(LINES/2 - 1, (COLS - 75)/2, 2, 75);  //  Draw SEARCH_BAR
         draw_rectangle(LINES/2 - 1, (COLS + 75 + 5)/2, 2, 13);  //  Draw SEARCH_BUTTON
@@ -274,5 +302,27 @@ void Frontend::main_scr() {
     }
     endwin();
 }
-=======
->>>>>>> a8bf8ba8dace72f7e817427089780924eaa34cd5
+
+
+void Frontend::loading_scr() {
+    //  Initializing for ncurses
+    initscr();
+    noecho();
+    cbreak();
+    keypad(stdscr, TRUE);
+    curs_set(0);    //  Set cursor invisible
+
+    
+    draw_rectangle(0, 0, LINES - 1, COLS - 1);  //  Draw main window
+    draw_logo(-2, 0);
+    attron(A_BLINK); attron(A_BOLD);
+    mvprintw(LINES/2, (COLS - 7)/2, "LOADING");
+    attroff(A_BLINK); attroff(A_BOLD);
+    refresh();
+
+    Trie trie(256);
+    trie.Import();
+
+    clear_scr(3, 47);
+    main_scr(trie);
+}

@@ -2,7 +2,7 @@
 
 int main() {
     Frontend frontend;
-    frontend.main_scr();
+    frontend.loading_scr();
 
     return 0;
 }
