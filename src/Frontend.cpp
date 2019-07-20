@@ -1,6 +1,5 @@
 #include <Frontend.hpp>
 
-<<<<<<< HEAD
 void Frontend::draw_rectangle(int x1, int y1, int height, int width) {
     attron(A_BOLD);
     int x2 = x1 + height, y2 = y1 + width;
@@ -274,5 +273,3 @@ void Frontend::main_scr() {
     }
     endwin();
 }
-=======
->>>>>>> a8bf8ba8dace72f7e817427089780924eaa34cd5
