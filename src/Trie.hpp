@@ -25,7 +25,6 @@ public:
     
     ~Trie();
     
-    void Try(Node * p, std::string s);
     bool HasText(int id);
     int NumberOfText();
     long long SumSquareLength(int id);

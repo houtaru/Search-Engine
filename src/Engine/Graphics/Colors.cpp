@@ -116,7 +116,7 @@ Color Colors::hex(std::string str) {
     return Colors::rgb(comps[0], comps[1], comps[3]);
 }
 
-Color name(std::string str) {
+Color Colors::name(std::string str) {
     Color color;
     if (str.empty()) return color;
     if (str == "default") color.ncurses_color = COLOR_DEFAULT;
@@ -167,7 +167,7 @@ ColorPair Colors::pair(Color &foreground, Color &background, bool is_bold) {
     init_pair(color_pair_no - 1, fg, bg);
     
     p.ncurses_pair = COLOR_PAIR(color_pair_no - 1);
-    if (is_bold) p.ncurses_pair |= A_BOLD);
+    if (is_bold) p.ncurses_pair |= A_BOLD;
 
     return p;
 }

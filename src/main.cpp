@@ -1,8 +1,9 @@
-#include <Frontend.hpp>
+#include <Engine/Graphics/Ncurses.hpp>
+#include <Engine/Graphics/Window.hpp>
 
 int main() {
-    Frontend frontend;
-    frontend.main_scr();
-
-    return 0;
+    Ncurses::init();
+    mvprintw(1, 1, "%d %d", COLS, LINES);
+    Ncurses::getInput();
+    Ncurses::exit();
 }

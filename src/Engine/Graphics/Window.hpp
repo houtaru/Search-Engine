@@ -60,16 +60,6 @@ class Window {
 
         void horizontalLine(int x, int y, int c, int width, ColorPair p);
 
-        // All possible positions where a Window title can be
-        // @note A Window can have titles on all of those
-        enum WindowTitlePosition {
-            TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT
-        };
-
-        // Set a text that will appear at the top of the Window.
-        // By defaults it's show on the top of the borders, with a highlighted color tone.
-        void setTitle(std::string title, WindowTitlePosition position = Window::TOP_LEFT);
-
 protected:
     WINDOW * win;
 
@@ -79,11 +69,6 @@ protected:
     int height;
 
     BorderType borderType;
-
-    std::string topLeftTitle;
-    std::string topRightTitle;
-    std::string bottomLeftTitle;
-    std::string bottomRightTitle;
 };
 
-#endif
+#endif      // WINDOW_H_DEFINED
