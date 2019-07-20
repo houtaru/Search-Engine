@@ -4,6 +4,7 @@
 int main() {
     Ncurses::init();
     mvprintw(1, 1, "%d %d", COLS, LINES);
+	refresh();
     Ncurses::getInput();
     Ncurses::exit();
 }
