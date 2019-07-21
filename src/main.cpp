@@ -1,10 +1,10 @@
-#include "utils.h"
-using namespace std;
-int main() {
-    string s="+-*" ;
-    vector<string> k=tokenizer(s,0) ; 
-    preprocess_data(k) ; 
-    for (auto i :k)
-       cout << i <<endl ; 
+#include <Engine/Graphics/Ncurses.hpp>
+#include <Engine/Graphics/Window.hpp>
 
+int main() {
+    Ncurses::init();
+    mvprintw(1, 1, "%d %d", COLS, LINES);
+	refresh();
+    Ncurses::getInput();
+    Ncurses::exit();
 }

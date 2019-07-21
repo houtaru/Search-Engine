@@ -1,18 +1,10 @@
-#include <Trie.hpp>
+#include "Trie.hpp"
 
 #include <iostream>
 #include <fstream>
 #include <queue>
 
 #include <utils.h>
-
-void Trie::Try(Node *p, std::string s) {
-    if (p -> distribution.size()) {
-        system((s + " >> log").c_str());
-    }
-    for (int i = 0; i < nChild; ++i) if (p->child[i] != NULL)
-        Try(p->child[i], s + char(i));
-}
 
 Trie::Node::Node() {}
 Trie::Node::Node(int nChild) {
@@ -118,6 +110,7 @@ void Trie::Import() {
     }
     //std::cout << "All words = " << cnt << '\n';
 }
+
 void Trie::Export() {
     system("mkdir Data/");
     std::ofstream fout("Data/Trie.data");
