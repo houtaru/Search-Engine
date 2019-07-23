@@ -21,6 +21,7 @@ std::string String::trim(const std::string &str) {
     return ltrim(rtrim(str));
 }
 
+
 std::vector < std::string > String::split(const std::string& str, char delim, bool flag) {
     std::stringstream ss(str);          // buffers
     std::string item;                   // current thing
@@ -43,4 +44,9 @@ std::vector < std::string > String::split(const std::string& str, char delim, bo
         elements.push_back(res);
     }
     return elements;
+}
+
+std::string String::to_lower(std::string str) {
+    boost::algorithm::to_lower(str);
+    return str;
 }

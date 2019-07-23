@@ -75,6 +75,7 @@ bool Colors::init() {
         for (int i = COLOR_BLACK; i <= COLOR_WHITE; ++i)
             init_pair(k++, i, COLOR_DEFAULT);
     }
+    system(("echo " + String::toString(k) + " >> log").c_str());
  
     return true;
 }
@@ -187,9 +188,9 @@ void Colors::activate(WINDOW * window, Color& foregound, Color& background) {
 }
 
 void Colors::pairActivate(WINDOW * window, ColorPair& color) {
-    wattron(window, color.ncurses_pair);
+    wattrset(window, color.ncurses_pair);
 }
 
-void Colors::pairDeactive(WINDOW * window, ColorPair& color) {
+void Colors::pairDeactivate(WINDOW * window, ColorPair& color) {
     wattroff(window, color.ncurses_pair);
 }
