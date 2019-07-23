@@ -1,10 +1,17 @@
+#include <Engine/EngineGlobals.hpp>
 #include <Engine/Graphics/Ncurses.hpp>
-#include <Engine/Graphics/Window.hpp>
 
-int main() {
-    Ncurses::init();
-    mvprintw(1, 1, "%d %d", COLS, LINES);
-	refresh();
-    Ncurses::getInput();
-    Ncurses::exit();
+int main(int argc, char **argv) {
+    // try {
+    //     // Settings
+    //     EngineGlobals::init();
+    //     Ncurses::init();
+
+    //     Ncurses::exit();
+    // } catch (...) {
+    //     Ncurses::exit();
+    //     throw "Error!!";
+    //     return 1;
+    // }
+    return 0;
 }

@@ -6,6 +6,7 @@ data
 Data
 TextData
 TextData2
-main.cpp
+src/main.cpp
 .directory
 *.o
+src/main.cpp
