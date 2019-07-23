@@ -6,7 +6,7 @@
 EXE			= main
 CDEBUG		= -O2
 CXXFLAGS	= $(CDEBUG) -Wall -Wextra $(CFLAGS_PLATFORM) -std=c++11 -O2 -w
-LDFLAGS		= -lncurses $(LDFLAGS_PLATFORM)
+LDFLAGS		= -lmenu -lncurses $(LDFLAGS_PLATFORM)
 INCLUDEDIRS = -I"src/"
 LIBSDIR		=
 

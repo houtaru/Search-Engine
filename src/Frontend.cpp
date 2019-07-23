@@ -76,9 +76,11 @@ void view_document(vector<string> query, string name_document) {
     ifstream fin("TextData2/" + name_document);
     vector<string> content;
     string sub;
-    while (fin >> sub)
+    while (getline(fin, sub))
         content.push_back(sub);
     fin.close();
+
+    
 
     //  row: current row
     //  length_row: the current length on the current row
@@ -123,6 +125,9 @@ void view_document(vector<string> query, string name_document) {
                 if (mouse.bstate & BUTTON1_CLICKED) {
                     if (mouse.y == LINES-8 + 1 && mouse.x >= (COLS - 9)/2 + 1 && mouse.x <= (COLS - 9)/2 +8)
                         break;
+                }
+                if (mouse.bstate & BUTTON1_CLICKED) {
+
                 }
             }
         }
