@@ -33,6 +33,9 @@ public:
     // Import Trie from file
     void Import();
     
+    // Loading all text from folder TextData2
+    bool Loading(); 
+    
     // Export Trie to file
     void Export();
     

@@ -47,5 +47,6 @@ clean:
 
 dirs:
 	$(MUTE)mkdir -p bin
-
+	$(MUTE)mkdir -p Data
+	
 .PHONY: clean dirs

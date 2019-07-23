@@ -351,7 +351,8 @@ void Frontend::loading_scr() {
 
     Trie trie(256);
     trie.Import();
-
+    if (trie.Loading()) trie.Export();
+    
     clear_scr(3, LINES - 3);
     refresh();
     main_scr(trie);

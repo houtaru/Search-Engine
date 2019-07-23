@@ -28,7 +28,7 @@ bool Trie::HasText(int id) {
 }
 
 int Trie::NumberOfText() {
-    return UsedText.size();
+    return (UsedText.rbegin()) -> first + 1;
 }
 
 long long Trie::SumSquareLength(int id) {
@@ -111,8 +111,39 @@ void Trie::Import() {
     //std::cout << "All words = " << cnt << '\n';
 }
 
+
+bool Trie::Loading() {
+    std::ifstream fin("TextData2/___index.txt");
+    std::string filename;
+    int cnt = 0;
+    int totalChar = 0;
+    bool isChanged = false;
+    while (getline(fin, filename)) {
+        if (HasText(cnt)) {
+       //     std::cerr << "Have added " << cnt << "already\n";
+            ++cnt;
+            continue;
+        }
+        std::ifstream data("TextData2/" + filename);
+        std::string st;
+        std::string text;
+        while (getline(data, st)) {
+            for (char c : st) {
+                isChanged = true;
+                if ('A' <= c && c <= 'Z') c += 32;
+                if (('a' <= c && c <= 'z') || ('0' <= c && c <= '9') || c == ' ')
+                text.push_back(c);
+            }
+            text.push_back(' '); 
+        }
+        AddText(cnt, text);
+        totalChar += text.size();
+        ++cnt;
+    }
+    return isChanged;
+}
+
 void Trie::Export() {
-    system("mkdir Data/");
     std::ofstream fout("Data/Trie.data");
     if (!root) {
         fout << 0 << ' ' << 0 << '\n';
@@ -135,7 +166,7 @@ void Trie::Export() {
         fout << '\n'; 
         for (int i = 0; i < p -> child.size(); ++i) if (p -> child[i]) q.push(p -> child[i]);
     }
-    std::cerr << "Total Node on trie: " << cnt << '\n';
+    //std::cerr << "Total Node on trie: " << cnt << '\n';
 }
 
 std::vector < std::string > Trie::auto_suggestion(std::string text, int lim) {
