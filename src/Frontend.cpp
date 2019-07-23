@@ -40,23 +40,6 @@ void Frontend::draw_logo(int x1, int x2) {  //  x1, x2 is the coordinate accordi
 }
 
 
-void get_query(char *input_search) {
-    move(LINES/2, (COLS - 75)/2 + 1);   //  Set the cursor to be in the Search rectangle
-    curs_set(1);    //  Set cursor visible
-    echo();
-    getstr(input_search);
-    noecho();
-    curs_set(0);
-}
-
-
-void reset() {
-    for (int i = 0; i < 74; ++i)
-        mvaddch(LINES/2, (COLS - 75)/2 + i+1, ' ');
-    refresh();
-}
-
-
 void clear_scr(int x1, int x2) {
     for (int i = x1; i <= x2; ++i)
         for (int j = 5; j <= COLS - 5; ++j)
@@ -156,15 +139,14 @@ void mouse_search_scr(int &current_pointer, int x, int y, vector<string> result)
 }
 
 
-void Frontend::search_scr(Trie &trie, char *input_search) {
+void Frontend::search_scr(Trie &trie, string input_search) {
     clear_scr(3, LINES - 3); 
     MEVENT mouse;
     mousemask(ALL_MOUSE_EVENTS, NULL);
 
     draw_logo(- LINES/2 + 8 + 3, - COLS/2 + 51/2 + 15); //  8 == logo.size() and 51 == logo[0].size()
     draw_rectangle(6, 76, 2, 75);    //  Draw SEARCH_BAR besides the logo
-    for (int i = 0; i < strlen(input_search); ++i)
-        mvaddch(7, 76+1 + i, input_search[i]);
+    mvprintw(7, 76+1, input_search.c_str());
 
     vector<string> query = tokenizer(input_search);
 
@@ -268,6 +250,52 @@ void mouse_main_scr(int &current_pointer, int x, int y) {
 }
 
 
+void get_query(string &input_search, int &current_pointer, int x, int y, int width) {
+    move(x, y);   //  Set the cursor to be in the Search rectangle
+    curs_set(1);    //  Set cursor visible
+
+    MEVENT mouse;
+    mousemask(ALL_MOUSE_EVENTS, NULL);
+    int a = x, b = y;
+    while (true) {
+        int temp = getch();
+        if (temp == '\n') {
+            current_pointer = SEARCH_BUTTON;
+            break;
+        }
+        if (temp == KEY_MOUSE) {
+            if (getmouse(&mouse) == OK) {
+                if (mouse.bstate & BUTTON1_CLICKED) {
+                    mouse_main_scr(current_pointer, mouse.y, mouse.x);
+                    if (current_pointer != SEARCH_BAR)
+                        break;
+                    else
+                        continue;
+                }
+            }
+        }
+        if (temp == 127 || temp == 263 && b > y) {   //  If user press BACKSPACE
+            mvaddch(a, --b, ' ');
+            if (!input_search.empty())
+                input_search.pop_back();
+            move(a, b);
+        } else if (b < y + 75) {    //  User have to input a query with length < 75
+            input_search.push_back((char)temp);
+            mvaddch(a, b++, temp);
+        }
+    }
+
+    curs_set(0);
+}
+
+
+void reset() {
+    for (int i = 0; i < 74; ++i)
+        mvaddch(LINES/2, (COLS - 75)/2 + i+1, ' ');
+    refresh();
+}
+
+
 void Frontend::main_scr(Trie &trie) {
     MEVENT mouse;
     mousemask(ALL_MOUSE_EVENTS, NULL);
@@ -303,22 +331,26 @@ void Frontend::main_scr(Trie &trie) {
                     if (mouse.bstate & BUTTON1_CLICKED) {
                         mouse_main_scr(current_pointer, mouse.y, mouse.x);
 
-                        char input_search[100];
-                        switch (current_pointer) {
-                            case SEARCH_BAR:
-                                get_query(input_search);
-                                break;
-                            case SEARCH_BUTTON:
+                        string input_search; 
+                        Loop:switch (current_pointer) {
+                            case SEARCH_BAR: {
+                                get_query(input_search, current_pointer, LINES/2, (COLS-75)/2 + 1, 74);
+                            }
+                                goto Loop;
+                            case SEARCH_BUTTON: {
                                 search_scr(trie, input_search);
-                                input_search[0] = '\0';
+                                input_search.clear();
                                 break;
-                            case RESET:
+                            }
+                            case RESET: {
                                 reset();
-                                input_search[0] = '\0';
+                                input_search.clear();
                                 break;
-                            case QUIT:
+                            }
+                            case QUIT: {
                                 exit_while = true;
                                 break;
+                            }
                         }
                     }
             }
