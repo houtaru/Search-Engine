@@ -102,7 +102,7 @@ namespace Colors {
     
     // De-actives the color pair #color on a ncurses #window
     // @note Default of #window is ncurses default window
-    void pairDeactive(WINDOW *window, ColorPair& color);
+    void pairDeactivate(WINDOW *window, ColorPair& color);
 }
 
 #endif
