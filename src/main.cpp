@@ -3,6 +3,5 @@
 int main() {
     Frontend frontend;
     frontend.loading_scr();
-
-    return 0;
+    
 }
