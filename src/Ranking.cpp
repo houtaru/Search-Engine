@@ -100,7 +100,7 @@ vector<int> Ranking::output(Trie &trie, vector<string> query, int k) {
             ++number_terms[j.first];
             score[j.first] += w_tq * (1 + log(j.second * 1.0));
         }
-        cerr << nText << ' '; exit(0);
+     //   cerr << nText << ' '; exit(0);
         
     }
 

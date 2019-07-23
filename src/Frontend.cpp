@@ -200,6 +200,24 @@ void Frontend::search_scr(Trie &trie, char *input_search) {
             attroff(A_BOLD); 
         }
 
+        // Show some thing
+        for (int i = 0; i < size - 1; ++i) {
+            int numchar = 210;
+            ifstream data("TextData2/" + result[i]);
+            string st, temp;
+            while (data >> temp) {
+                for (char c : temp) st.push_back(c);
+                st.push_back(' ');
+                if (st.size() >= numchar) break;
+            }
+            
+            for (int _ = 0; _ < min(numchar, (int)st.size()); _ += 70) {
+                int remain = (int)st.size() - _; 
+                string sub = st.substr(_, min(remain, 70));
+                mvprintw(14 + (_ / 70) + 5 * i, 75, sub.c_str());
+                // break;
+            }
+        }
 
         int input = getch();
         bool exit_while = false;
