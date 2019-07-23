@@ -41,9 +41,12 @@ void Frontend::draw_logo(int x1, int x2) {  //  x1, x2 is the coordinate accordi
 
 
 void get_query(char *input_search) {
+    move(LINES/2, (COLS - 75)/2 + 1);   //  Set the cursor to be in the Search rectangle
+    curs_set(1);    //  Set cursor visible
     echo();
     getstr(input_search);
     noecho();
+    curs_set(0);
 }
 
 
@@ -56,7 +59,7 @@ void reset() {
 
 void clear_scr(int x1, int x2) {
     for (int i = x1; i <= x2; ++i)
-        for (int j = 5; j <= 195; ++j)
+        for (int j = 5; j <= COLS - 5; ++j)
             mvaddch(i, j, ' ');
 }
 
@@ -66,10 +69,7 @@ void view_document(vector<string> query, string name_document) {
     attron(A_BOLD);
 
     mvprintw(13, (COLS - name_document.size())/2, name_document.c_str());
-
-    attron(A_REVERSE);
     mvprintw(LINES-8 + 1, (COLS - 9)/2 + 1, "  BACK  ");
-    attroff(A_REVERSE);
 
     attroff(A_BOLD);
 
@@ -114,17 +114,53 @@ void view_document(vector<string> query, string name_document) {
     }
 
     while (true) {
+        MEVENT mouse;
+        mousemask(ALL_MOUSE_EVENTS, NULL);
+
         int input = getch();
-        if (input == '\n')
-            break;
+        if (input == KEY_MOUSE) {
+            if (getmouse(&mouse) == OK) {
+                if (mouse.bstate & BUTTON1_CLICKED) {
+                    if (mouse.y == LINES-8 + 1 && mouse.x >= (COLS - 9)/2 + 1 && mouse.x <= (COLS - 9)/2 +8)
+                        break;
+                }
+            }
+        }
     }
 
     clear_scr(12, LINES - 10);
 }
 
 
+enum {
+    DOCUMENT1,
+    DOCUMENT2,
+    DOCUMENT3,
+    DOCUMENT4,
+    DOCUMENT5,
+    BACK
+};
+
+
+void mouse_search_scr(int &current_pointer, int x, int y, vector<string> result) {
+    if (x == LINES-8 + 1 && y >= (COLS - 9)/2 + 1 && y <= (COLS - 9)/2 + 8)
+        current_pointer = BACK;
+    else {
+        for (int i = DOCUMENT1; i <= DOCUMENT5; ++i) 
+            if (x == 13 + 5*i && y >= 70 && y <= 70 + result[i].size()-1) {
+                current_pointer = i;
+                break;
+            }
+    }
+
+}
+
+
 void Frontend::search_scr(Trie &trie, char *input_search) {
-    clear_scr(3, 47); 
+    clear_scr(3, LINES - 3); 
+    MEVENT mouse;
+    mousemask(ALL_MOUSE_EVENTS, NULL);
+
     draw_logo(- LINES/2 + 8 + 3, - COLS/2 + 51/2 + 15); //  8 == logo.size() and 51 == logo[0].size()
     draw_rectangle(6, 76, 2, 75);    //  Draw SEARCH_BAR besides the logo
     for (int i = 0; i < strlen(input_search); ++i)
@@ -148,14 +184,11 @@ void Frontend::search_scr(Trie &trie, char *input_search) {
     result.push_back("  BACK  ");
 
 
-    int current_pointer = 0, size = (int)result.size();
+    int current_pointer = -1, size = (int)result.size();
     while (true) {
         draw_rectangle(LINES - 8, (COLS - 9)/2, 2, 9) ;   //  Draw BACK 
         //  Print result and BACK content
         for (int i = 0; i < size; ++i) {
-            if (i == current_pointer)
-                attron(A_REVERSE);
-
             attron(A_BOLD);
             if (i == size - 1)
                 mvprintw(LINES-8 + 1, (COLS - 9)/2 + 1, result[i].c_str());
@@ -165,43 +198,40 @@ void Frontend::search_scr(Trie &trie, char *input_search) {
                 attroff(A_UNDERLINE);
             }
             attroff(A_BOLD); 
-
-            if (i == current_pointer)
-                attroff(A_REVERSE);
         }
 
 
         int input = getch();
         bool exit_while = false;
         switch (input) {
-            case KEY_DOWN:
-                current_pointer = (current_pointer + 1) % size;
-                break;
-            case KEY_UP:
-                current_pointer = (current_pointer + size - 1) % size;
-                break;
-            case '\n': {
-                if (current_pointer == size - 1) {   //  If user choose BACK
-                    exit_while = true;
-                    break;
-                }
+            case KEY_MOUSE: {
+                if (getmouse(&mouse) == OK) {
+                    if (mouse.bstate & BUTTON1_CLICKED) {
+                        mouse_search_scr(current_pointer, mouse.y, mouse.x, result);
 
-                switch (current_pointer) {
-                    case 0:
-                        view_document(query, result[0]);
-                        break;
-                    case 1:
-                        view_document(query, result[1]);
-                        break;
-                    case 2:
-                        view_document(query, result[2]);
-                        break;
-                    case 3:
-                        view_document(query, result[3]);
-                        break;
-                    case 4:
-                        view_document(query, result[4]);
-                        break;
+                        switch (current_pointer) {
+                            case DOCUMENT1:
+                                view_document(query, result[0]);
+                                break;
+                            case DOCUMENT2:
+                                view_document(query, result[1]);
+                                break;
+                            case DOCUMENT3:
+                                view_document(query, result[2]);
+                                break;
+                            case DOCUMENT4:
+                                view_document(query, result[3]);
+                                break;
+                            case DOCUMENT5:
+                                view_document(query, result[4]);
+                                break;
+                            case BACK:
+                                exit_while = true;
+                                break;
+                        }
+
+                        current_pointer = -1;   //  Reset current pointer
+                    }
                 }
             }
         }
@@ -211,24 +241,44 @@ void Frontend::search_scr(Trie &trie, char *input_search) {
 
         refresh();
     }
-    clear_scr(3, 47);
+    clear_scr(3, LINES - 3);
 }
 
 
-void Frontend::main_scr(Trie &trie) {
-    enum {
+enum {
     SEARCH_BAR,
     SEARCH_BUTTON,
     RESET,
     QUIT
-    };  
+}; 
+
+void mouse_main_scr(int &current_pointer, int x, int y) {
+    if (x == LINES/2 + 5) {
+        if (y >= COLS/2 - 19 && y <= COLS/2 - 8)
+            current_pointer = RESET;
+        else if (y >= COLS/2 + 8 && y <= COLS/2 + 19)
+            current_pointer = QUIT;
+    }
+    else if (x == LINES/2) {
+        if (y >= (COLS - 75)/2 + 1 && y <= (COLS - 75)/2 + 74)
+            current_pointer = SEARCH_BAR;
+        else if (y >= (COLS + 75 + 5)/2 + 1 && y <= (COLS + 75 + 5)/2 + 12)
+            current_pointer = SEARCH_BUTTON;
+    }
+}
+
+
+void Frontend::main_scr(Trie &trie) {
+    MEVENT mouse;
+    mousemask(ALL_MOUSE_EVENTS, NULL);
+
     vector<string> content{
         "",
         "   SEARCH   ",
         "   RESET    ",
         "    QUIT    "
     };
-    int current_pointer = 0, size = 4;   //  size is the number of rectangles
+    int current_pointer = -1, size = 4;   //  size is the number of rectangles
     while (true) {
         draw_logo(-2, 0);
         draw_rectangle(LINES/2 - 1, (COLS - 75)/2, 2, 75);  //  Draw SEARCH_BAR
@@ -237,61 +287,40 @@ void Frontend::main_scr(Trie &trie) {
         draw_rectangle(LINES/2 + 4, COLS/2 + 7, 2, 13);    //  Draw QUIT
 
         //  Print content for rectangles
-        curs_set(0);    //  Set cursor invisible
         attron(A_BOLD);
-        if (current_pointer == SEARCH_BUTTON)
-            attron(A_REVERSE);
         mvprintw(LINES/2, (COLS + 75 + 5)/2 + 1, content[SEARCH_BUTTON].c_str());
-        if (current_pointer == SEARCH_BUTTON)
-            attroff(A_REVERSE);
-
-        if (current_pointer == RESET)
-            attron(A_REVERSE);
         mvprintw(LINES/2 + 5, COLS/2 - 19, content[RESET].c_str());
-        if (current_pointer == RESET)
-            attroff(A_REVERSE);
-
-        if (current_pointer == QUIT)
-            attron(A_REVERSE);
         mvprintw(LINES/2 + 5, COLS/2 + 8, content[QUIT].c_str());
-        if (current_pointer == QUIT)
-            attroff(A_REVERSE);
         attroff(A_BOLD);
-
-        if (current_pointer == SEARCH_BAR) {
-            curs_set(1);    //  Set cursor visible
-            move(LINES/2, (COLS - 75)/2 + 1);   //  Set the cursor to be in the Search rectangle
-        }
+        refresh();
 
 
         int input = getch();
         bool exit_while = false;
         switch (input) {
-            case KEY_DOWN:
-                current_pointer = (current_pointer + 1) % size;
-                break;
-            case KEY_UP:
-                current_pointer = (current_pointer + size - 1) % size;
-                break;
-            case '\n': {
-                if (current_pointer == QUIT) {   //  If user choose QUIT
-                    exit_while = true;
-                    break;
-                }
+            case KEY_MOUSE: {
+                if (getmouse(&mouse) == OK)
+                    if (mouse.bstate & BUTTON1_CLICKED) {
+                        mouse_main_scr(current_pointer, mouse.y, mouse.x);
 
-                char input_search[100];
-                switch (current_pointer) {
-                    case SEARCH_BAR:
-                        get_query(input_search);
-                        break;
-                    case SEARCH_BUTTON:
-                        search_scr(trie, input_search);
-                        input_search[0] = '\0';
-                        break;
-                    case RESET:
-                        reset();
-                        break;
-                }
+                        char input_search[100];
+                        switch (current_pointer) {
+                            case SEARCH_BAR:
+                                get_query(input_search);
+                                break;
+                            case SEARCH_BUTTON:
+                                search_scr(trie, input_search);
+                                input_search[0] = '\0';
+                                break;
+                            case RESET:
+                                reset();
+                                input_search[0] = '\0';
+                                break;
+                            case QUIT:
+                                exit_while = true;
+                                break;
+                        }
+                    }
             }
         }
 
@@ -323,6 +352,7 @@ void Frontend::loading_scr() {
     Trie trie(256);
     trie.Import();
 
-    clear_scr(3, 47);
+    clear_scr(3, LINES - 3);
+    refresh();
     main_scr(trie);
 }
