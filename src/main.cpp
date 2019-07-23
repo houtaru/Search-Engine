@@ -1,10 +1,7 @@
-#include <Engine/Graphics/Ncurses.hpp>
-#include <Engine/Graphics/Window.hpp>
-
+#include <Frontend.hpp>
+#include <Trie.hpp> 
 int main() {
-    Ncurses::init();
-    mvprintw(1, 1, "%d %d", COLS, LINES);
-	refresh();
-    Ncurses::getInput();
-    Ncurses::exit();
+ Frontend frontend;
+ frontend.loading_scr();
+
 }

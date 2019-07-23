@@ -33,6 +33,7 @@ public:
     // Import Trie from file
     void Import();
     
+    void Loading() ;
     // Export Trie to file
     void Export();
     

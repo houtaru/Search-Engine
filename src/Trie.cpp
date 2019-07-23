@@ -66,6 +66,35 @@ int Trie::Search(std::string word, int id) {
     }
     return p -> distribution[id];
 }
+void Trie::Loading() {
+    std::ifstream fin("TextData2/___index.txt");
+    std::string filename;
+    int cnt = 0;
+    int totalChar = 0;
+    while (getline(fin, filename)) {
+        if (HasText(cnt)) {
+       //     std::cerr << "Have added " << cnt << "already\n";
+            ++cnt;
+            continue;
+        }
+        std::ifstream data("TextData2/" + filename);
+        std::string st;
+        std::string text;
+        while (getline(data, st)) {
+            for (char c : st) {
+                  if ('A' <= c && c <= 'Z') c += 32;
+                  if (('a' <= c && c <= 'z') || ('0' <= c && c <= '9') || c == ' ')
+                    text.push_back(c);
+            }
+            text.push_back(' '); 
+        }
+        AddText(cnt, text);
+    // return;
+        totalChar += text.size();
+        //cerr << "Done file " << cnt << ' ' << text.size() << '\n'; 
+        ++cnt;
+    }
+}
 
 std::map<int, int> Trie::Search(std::string word) {
     Node * p = root;
