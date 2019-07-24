@@ -1,42 +1,37 @@
-#include <Engine/EngineGlobals.hpp>
-#include <Engine/Graphics/Ncurses.hpp>
-#include <Engine/Graphics/Colors.hpp>
-#include <Engine/Graphics/Window.hpp>
+#include <ncurses.h>
+#include <bits/stdc++.h>
 
 #include <Engine/Utils/String.hpp>
 
-#include <iostream>
+using namespace std;
 
-void run() {
-    // Window * window = new Window(2, 2, 10, 10);
-    // window->clear();
-    // window->print("hello", 1, 1, Colors::pair("yellow", "default", true));
-    // window->refresh();
+// void view_document(vector <string> query, string file) {
+//     //clear screeb
+//     //clear_scr()
+    
+//     //TITLE
 
-    ColorPair p = Colors::pair("yellow", "default", true);
-    Colors::pairActivate(stdscr, p);
-    mvprintw(2, 2, "aaa");
-    Colors::pairDeactivate(stdscr, p);
-    refresh();
+//     ifstream fin("input.in");
+//     vector <string> content;
+//     string ss;
+//     while (getline(fin, ss))
+//       content.push_back(ss);
+// }
 
-    Ncurses::getInput();
-}
+int main() {
+    // initscr();
+    // noecho();
+    // cbreak();
+    // keypad(stdscr, TRUE);
+    // curs_set(0);    //  Set cursor invisible
 
-int main(int argc, char **argv) {
-    try {
-        // Settings
-        EngineGlobals::init();
-        Ncurses::init();
-        Colors::init();
+    // vector <string> query = {
+    //   "nam", "ngoi", "khoc"
+    // };
+    // view_document(query, "input.in");
 
-        run();
-
-        Ncurses::exit();
-    } catch (...) {
-        Ncurses::exit();
-        throw "Error!!";
-        return 1;
-    }
-
+    string s; getline(cin, s, '\n');
+    vector <string> cur = String::split(String::to_lower(s));
+    for (auto it : cur) cout << it << "\n";
     return 0;
 }

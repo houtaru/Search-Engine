@@ -34,7 +34,7 @@ std::vector < std::string > String::split(const std::string& str, char delim, bo
             for (int i = 0; i < item.size(); ++i) if (isalnum(item[i])) {
                 res += item[i];
             } else {
-                if (std::string("-$#*").find(item[i]) != std::string::npos) {
+                if (std::string("-$#*\"").find(item[i]) != std::string::npos) {
                     res += item[i];
                 } else if (i + 2 < item.size() && item[i] == '.' && item[i + 1] == '.') {
                     res += item[i] + item[++i];
