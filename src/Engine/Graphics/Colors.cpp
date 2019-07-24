@@ -134,7 +134,7 @@ Color Colors::name(std::string str) {
     return color;
 }
 
-ColorPair Colors::pair(Color &foreground, Color &background, bool is_bold) {
+ColorPair Colors::pair(Color &foreground, Color &background, bool is_bold, bool is_blink, bool is_underline) {
     ColorPair p(foreground, background);
     if (is_bold) p.bold = true;
     
@@ -146,11 +146,15 @@ ColorPair Colors::pair(Color &foreground, Color &background, bool is_bold) {
         if (bg == COLOR_DEFAULT) {
            p.ncurses_pair = COLOR_PAIR(64 + fg);
            if (is_bold) p.ncurses_pair |= A_BOLD;
+           if (is_blink) p.ncurses_pair |= A_BLINK;
+           if (is_underline) p.ncurses_pair |= A_UNDERLINE;
  
            return p;
         }
         p.ncurses_pair = COLOR_PAIR(fg * 8 + bg + 1);
         if (is_bold) p.ncurses_pair |= A_BOLD;
+           if (is_blink) p.ncurses_pair |= A_BLINK;
+           if (is_underline) p.ncurses_pair |= A_UNDERLINE;
         
         return p;
     }
@@ -158,6 +162,8 @@ ColorPair Colors::pair(Color &foreground, Color &background, bool is_bold) {
     if (COLORS < 256) {
         p.ncurses_pair = COLOR_PAIR(0);
         if (is_bold) p.ncurses_pair |= A_BOLD;
+        if (is_blink) p.ncurses_pair |= A_BLINK;
+        if (is_underline) p.ncurses_pair |= A_UNDERLINE;
         return p;
     }
     

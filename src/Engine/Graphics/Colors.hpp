@@ -80,7 +80,7 @@ namespace Colors {
     
     // Return a new `ColorPair` made with #foreground and #background colors.
     // @note #is_bold usually brightens the color.
-    ColorPair pair(Color& foreground, Color& background, bool is_bold = false);
+    ColorPair pair(Color& foreground, Color& background, bool is_bold = false, bool is_blink = false, bool is_underline = false);
     
     // Return a new `ColorPair` made with human-readable strings.
     //
