@@ -9,4 +9,4 @@ TextData2
 src/main.cpp
 .directory
 *.o
-src/main.cpp
+main.cpp
