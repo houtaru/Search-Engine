@@ -1,15 +1,15 @@
 #include <Frontend.hpp>
 
-// ColorPair BLACK = Colors::pair("black", "black", true);
-// ColorPair RED = Colors::pair("red", "black", true);
-// ColorPair GREEN = Colors::pair("green", "black", true);
-// ColorPair YELLOW = Colors::pair("yellow", "black", true);
-// ColorPair BLUE = Colors::pair("blue", "black", true);
-// ColorPair MAGENTA = Colors::pair("magenta", "black", true);
-// ColorPair CYAN = Colors::pair("cyan", "black", true);
-// ColorPair WHITE = Colors::pair("white", "black", true);
-
-
+enum {
+    BLACK,
+    RED,
+    GREEN,
+    YELLOW,
+    BLUE,
+    MAGENTA,
+    CYAN,
+    WHITE
+};
 
 void Frontend::draw_rectangle(int x1, int y1, int height, int width) {
     attron(A_BOLD);
@@ -35,17 +35,76 @@ void Frontend::draw_rectangle(int x1, int y1, int height, int width) {
 void Frontend::draw_logo(int x1, int x2) {  //  x1, x2 is the coordinate according to the center of the screen
     attron(A_BOLD);
     vector<string> logo = {
-        "   ___                                             ",
-        "  /   |                                            ",
-        " / /| | _ __   __ _  _ __    __ _   ___  _ __  ___ ",
-        "/ /_| || '__| / _` || '_ \\  / _` | / _ \\| '__|/ __|",
-        "\\___  || |   | (_| || | | || (_| ||  __/| |   \\__ \\",
-        "    |_/|_|    \\__,_||_| |_| \\__, | \\___||_|   |___/",
-        "                             __| |                 ",
-        "                            |____/                 "
+        "   ___                                            ",
+        "  /   |                                           ",
+        " / /| | _ __  __ _  _ __    __ _   ___  _ __  ___ ",
+        "/ /_| || '__|/ _` || '_ \\  / _` | / _ \\| '__|/ __|",
+        "\\___  || |  | (_| || | | || (_| ||  __/| |   \\__ \\",
+        "    |_/|_|   \\__,_||_| |_| \\__, | \\___||_|   |___/",
+        "                            __| |                 ",
+        "                           |____/                 "
     };
-    for (int i = 0; i < (int)logo.size(); ++i)
-        mvprintw(LINES/2 - logo.size() + x1 + i, COLS/2 - logo[0].size()/2 + x2, logo[i].c_str());
+    for (int i = 0; i < (int)logo.size(); ++i) {
+        //  Draw 4
+        attron(COLOR_PAIR(BLUE));
+        for (int j = 0; j < 7; ++j) {
+            mvaddch(LINES/2 - logo.size() + x1 + i, COLS/2 - logo[0].size()/2 + x2 + j, logo[i][j]);
+        }
+        attroff(COLOR_PAIR(BLUE));
+
+        //  Draw r
+        attron(COLOR_PAIR(RED));
+        for (int j = 7; j < 13; ++j) {
+            mvaddch(LINES/2 - logo.size() + x1 + i, COLS/2 - logo[0].size()/2 + x2 + j, logo[i][j]);
+        }
+        attroff(COLOR_PAIR(RED));
+
+        //  Draw a
+        attron(COLOR_PAIR(YELLOW));
+        for (int j = 13; j < 19; ++j) {
+            mvaddch(LINES/2 - logo.size() + x1 + i, COLS/2 - logo[0].size()/2 + x2 + j, logo[i][j]);
+        }
+        attroff(COLOR_PAIR(YELLOW));
+
+        //  Draw n
+        attron(COLOR_PAIR(GREEN));
+        for (int j = 19; j < 26; ++j) {
+            mvaddch(LINES/2 - logo.size() + x1 + i, COLS/2 - logo[0].size()/2 + x2 + j, logo[i][j]);
+        }
+        attroff(COLOR_PAIR(GREEN));
+
+        //  Draw g
+        attron(COLOR_PAIR(BLUE));
+        for (int j = 26; j < 33; ++j) {
+            mvaddch(LINES/2 - logo.size() + x1 + i, COLS/2 - logo[0].size()/2 + x2 + j, logo[i][j]);
+        }
+        attroff(COLOR_PAIR(BLUE));
+
+        //  Draw e
+        attron(COLOR_PAIR(RED));
+        for (int j = 33; j < 39; ++j) {
+            mvaddch(LINES/2 - logo.size() + x1 + i, COLS/2 - logo[0].size()/2 + x2 + j, logo[i][j]);
+        }
+        attroff(COLOR_PAIR(RED));
+
+        //  Draw r
+        attron(COLOR_PAIR(YELLOW));
+        for (int j = 39; j < 45; ++j) {
+            mvaddch(LINES/2 - logo.size() + x1 + i, COLS/2 - logo[0].size()/2 + x2 + j, logo[i][j]);
+        }
+        attroff(COLOR_PAIR(YELLOW));
+
+        //  Draw s
+        attron(COLOR_PAIR(GREEN));
+        for (int j = 45; j < 50; ++j) {
+            mvaddch(LINES/2 - logo.size() + x1 + i, COLS/2 - logo[0].size()/2 + x2 + j, logo[i][j]);
+        }
+        attroff(COLOR_PAIR(GREEN));
+    }
+    attron(COLOR_PAIR(YELLOW));
+    mvaddch(LINES/2 - logo.size() + x1 + 4, COLS/2 - logo[0].size()/2 + x2 + 12, logo[4][12]);
+    attroff(COLOR_PAIR(YELLOW));
+        //mvprintw(LINES/2 - logo.size() + x1 + i, COLS/2 - logo[0].size()/2 + x2, logo[i].c_str());
     refresh();
     attroff(A_BOLD);
 }
@@ -62,8 +121,12 @@ void view_document(vector<string> query, string name_document) {
     clear_scr(12, LINES - 10);
     attron(A_BOLD);
 
+    attron(COLOR_PAIR(MAGENTA));
     mvprintw(13, (COLS - name_document.size())/2, name_document.c_str());
+    attroff(COLOR_PAIR(MAGENTA));
+    attron(COLOR_PAIR(CYAN));
     mvprintw(LINES-8 + 1, (COLS - 9)/2 + 1, "  BACK  ");
+    attroff(COLOR_PAIR(CYAN));
 
     attroff(A_BOLD);
 
@@ -125,6 +188,8 @@ void view_document(vector<string> query, string name_document) {
                 }
             }
         }
+        if (input == '\n')
+            break; 
     }
 
     clear_scr(12, LINES - 10);
@@ -188,19 +253,22 @@ void Frontend::search_scr(Trie &trie, string input_search) {
         //  Print result and BACK content
         for (int i = 0; i < size; ++i) {
             attron(A_BOLD);
-            if (i == size - 1)
+            if (i == size - 1) {
+                attron(COLOR_PAIR(CYAN));
                 mvprintw(LINES-8 + 1, (COLS - 9)/2 + 1, result[i].c_str());
+                attroff(COLOR_PAIR(CYAN));
+            }
             else {
-                attron(A_UNDERLINE);
+                attron(A_UNDERLINE | COLOR_PAIR(MAGENTA));
                 mvprintw(13 + 5*i, 70, result[i].c_str());
-                attroff(A_UNDERLINE);
+                attroff(A_UNDERLINE | COLOR_PAIR(MAGENTA));
             }
             attroff(A_BOLD); 
         }
         if (size == 1) { //  No matching result
-            attron(A_BLINK); attron(A_BOLD);
+            attron(A_BLINK | A_BOLD | COLOR_PAIR(RED));
             mvprintw(LINES/2, (COLS - 21)/2, "NO MATCHING RESULT!!!");
-            attroff(A_BLINK); attroff(A_BOLD);
+            attroff(A_BLINK | A_BOLD | COLOR_PAIR(RED));
         }
 
         // Show some thing
@@ -355,18 +423,18 @@ void Frontend::main_scr(Trie &trie) {
     };
     int current_pointer = SEARCH_BAR;
     while (true) {
-        draw_logo(-2, 0);
+        draw_logo(-4, 0);
         draw_rectangle(LINES/2 - 1, (COLS - 75)/2, 2, 75);  //  Draw SEARCH_BAR
         draw_rectangle(LINES/2 - 1, (COLS + 75 + 5)/2, 2, 13);  //  Draw SEARCH_BUTTON
         draw_rectangle(LINES/2 + 4, COLS/2 - 20, 2, 13);    //  Draw RESET
         draw_rectangle(LINES/2 + 4, COLS/2 + 7, 2, 13);    //  Draw QUIT
 
         //  Print content for rectangles
-        attron(A_BOLD); //Colors::pairActivate(stdscr, YELLOW);
+        attron(A_BOLD | COLOR_PAIR(CYAN)); //Colors::pairActivate(stdscr, YELLOW);
         mvprintw(LINES/2, (COLS + 75 + 5)/2 + 1, content[SEARCH_BUTTON].c_str());
         mvprintw(LINES/2 + 5, COLS/2 - 19, content[RESET].c_str());
         mvprintw(LINES/2 + 5, COLS/2 + 8, content[QUIT].c_str());
-        attroff(A_BOLD); //Colors::pairDeactivate(stdscr, YELLOW);
+        attroff(A_BOLD | COLOR_PAIR(CYAN)); //Colors::pairDeactivate(stdscr, YELLOW);
         refresh();
 
 
@@ -411,24 +479,30 @@ void Frontend::loading_scr() {
     cbreak();
     keypad(stdscr, TRUE);
     curs_set(0);    //  Set cursor invisible
-    //Colors::init();
+
+    //  Initialize color
     start_color();
-    init_pair(1, COLOR_RED, COLOR_BLACK);
+    init_pair(BLACK, COLOR_BLACK, COLOR_BLACK);
+    init_pair(RED, COLOR_RED, COLOR_BLACK);
+    init_pair(GREEN, COLOR_GREEN, COLOR_BLACK);
+    init_pair(YELLOW, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(BLUE, COLOR_BLUE, COLOR_BLACK);
+    init_pair(MAGENTA, COLOR_MAGENTA, COLOR_BLACK);
+    init_pair(CYAN, COLOR_CYAN, COLOR_BLACK);
+    init_pair(WHITE, COLOR_WHITE, COLOR_BLACK);
     
     draw_rectangle(0, 0, LINES - 1, COLS - 1);  //  Draw main window
-    draw_logo(-2, 0);
-    attron(A_BLINK); attron(A_BOLD);
-    //Colors::pairActivate(stdscr, RED);
+    draw_logo(-4, 0);
+    attron(A_BLINK | A_BOLD | COLOR_PAIR(MAGENTA));
     mvprintw(LINES/2, (COLS - 7)/2, "LOADING");
-    //Colors::pairDeactivate(stdscr, RED);
-    attroff(A_BLINK); attroff(A_BOLD);
+    attroff(A_BLINK | A_BOLD | COLOR_PAIR(MAGENTA));
     refresh();
 
     Trie trie(256);
     trie.Import();
     if (trie.Loading()) trie.Export();
     
-    clear_scr(3, LINES - 3);
+    clear_scr(LINES/2, LINES - 3);  //  7 is the logo.size()
     refresh();
     main_scr(trie);
 }
