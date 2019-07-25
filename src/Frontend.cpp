@@ -163,7 +163,7 @@ void view_document(vector<string> query, string name_document) {
     auto update = [&](int l, int r) {
         clear_scr(16, LINES - 10);
         for (int i = l; i < r; ++i) {
-            if (content[i].empty()) continue;
+            if (content[i].empty() || int(nxt[i].size()) > 1e5 || int(nxt[i].size()) < 0) continue;
             int pos = 54;
             for (int k = 0; k < nxt[i].size(); ++k) {
                 if (!nxt[i][k]) mvaddch(15 + (i - l + 1), pos++, content[i][k]);
