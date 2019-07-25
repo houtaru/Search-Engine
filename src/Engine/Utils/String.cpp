@@ -23,27 +23,35 @@ std::string String::trim(const std::string &str) {
 
 
 std::vector < std::string > String::split(const std::string& str, char delim, bool flag) {
-    std::stringstream ss(str);          // buffers
-    std::string item;                   // current thing
-    std::vector < std::string > elements;  // all things
+    std::string stopwords = "I a about an are as at be by com for from how in is it of on or that the this to was what when where who will with the www";
 
-    while (std::getline(ss, item, delim)) {
-        std::string res = item;
-        if (!flag) {
-            res = "";
-            for (int i = 0; i < item.size(); ++i) if (isalnum(item[i])) {
-                res += item[i];
-            } else {
-                if (std::string("-$#*\"").find(item[i]) != std::string::npos) {
-                    res += item[i];
-                } else if (i + 2 < item.size() && item[i] == '.' && item[i + 1] == '.') {
-                    res += item[i] + item[++i];
-                }
+    std::vector < std::string > result;
+    std::string cur;
+    
+    for (int i = 0; i < str.size(); ++i) {
+        if (str[i] == '\"') {
+            if (!cur.empty()) {
+                result.push_back(cur);
             }
+            if (stopwords.find(cur) == std::string::npos) {
+                cur.clear();
+            }
+            while (++i < str.size() && str[i] != '\"') cur += str[i];
+            if (!cur.empty()) result.push_back(cur);
+            cur.clear();
+        } else if (str[i] == ' ') {
+            if (stopwords.find(cur) == std::string::npos && !cur.empty()) {
+                result.push_back(cur);
+            }
+            cur.clear();
+        } else if (isalnum(str[i]) || std::string("-$#*\"").find(str[i]) != std::string::npos) {
+            cur += str[i];
+        } else if (i + 2 < str.size() && str[i] == '.' && str[i + 1] == '.') {
+            cur += str[i]; cur += str[++i];
         }
-        elements.push_back(res);
     }
-    return elements;
+    if (!cur.empty()) result.push_back(cur);
+    return result;
 }
 
 std::string String::to_lower(std::string str) {
