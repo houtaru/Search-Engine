@@ -133,52 +133,54 @@ void view_document(vector<string> query, string name_document) {
     attroff(A_BOLD);
 
     ifstream fin("TextData2/" + name_document);
-    // Store word and isEndline
-    vector< pair<string, bool> > content;
-    string st, sub;
-    while (getline(fin, st)){
-        stringstream ss(st);
-        while (ss >> sub)
-            content.push_back(make_pair(sub, 0));
-        content.push_back(make_pair(" ", 1));
-    }
-    fin.close();
 
-    
-
-    //  row: current row
-    //  length_row: the current length on the current row
-    //  index: current index in content
-    //  position: next position to print content[i]
-    int row = 1, length_row = 0, position = 54, index = 0;
-    while (index < content.size() && row < 23) {
-        length_row = position + content[index].first.size()+1 - 49;
-
-        if (length_row > 100 || (index && content[index - 1].second)) {
-            ++row;
-            if (row >= 23) 
-                break;
-            length_row = 0;
-            position = 49;
+    vector <string> cur;
+    string curl; while (getline(fin, curl, '\n'))
+        cur.push_back(curl);
+    vector <string> content;
+    for (auto it : cur) {
+        string tmp = it;
+        while (tmp.size() > 100) {
+            int pos = 99; while (tmp[pos] != ' ' && tmp[pos] != '.' && tmp[pos] != ',') pos--;
+            content.push_back(tmp.substr(0, pos + 1));
+            tmp.erase(0, pos + 1);
         }
+        content.push_back(tmp);
+    }
 
-        bool compare = false;
-        //  Compare content[index] to query. If it is, bolding it
-        for (auto i : String::split(String::to_lower(content[index].first)))
-            for (auto j : query)
-                if (String::to_lower(i).compare(String::to_lower(j)) == 0) {
-                    compare = true;
-                    attron(A_BOLD); attron(A_REVERSE);
-                    break;
+    // Pre-calculate #nxt array - the rightmost position that 
+    // content[i][k...nxt[i][k] - 1] equal to one of element in #query.
+    vector < vector <int> > nxt(content.size());
+    for (int i = 0; i < content.size(); ++i) {
+        nxt[i].resize(content[i].size());
+        for (int k = 0; k < content[i].size(); ++k) 
+            for (auto it : query) if (String::to_lower(content[i].substr(k, it.size())).compare(it) == 0) {
+                nxt[i][k] = max(nxt[i][k], int(it.size() + k));
+            }
+    }
+
+    // Update content when client press KEY_UP or KEY_DOWN
+    auto update = [&](int l, int r) {
+        clear_scr(16, LINES - 10);
+        for (int i = l; i < r; ++i) {
+            if (content[i].empty()) continue;
+            int pos = 54;
+            for (int k = 0; k < content[i].size(); ++k) {
+                if (!nxt[i][k]) mvaddch(15 + (i - l + 1), pos++, content[i][k]);
+                else {
+                    int sz = nxt[i][k] - k;
+                    attron(A_BOLD | A_REVERSE);
+                    mvaddstr(15 + (i - l + 1), pos, content[i].substr(k, sz).c_str());
+                    attroff(A_BOLD | A_REVERSE);
+                    k = nxt[i][k] - 1;
+                    pos += sz;
                 }
-        mvprintw(15 + row, position, content[index].first.c_str());
-        position += content[index].first.size() + 1;
-        ++index;
-        if (compare) {
-            attroff(A_BOLD); attroff(A_REVERSE);
+            }
         }
-    }
+        refresh();
+    };
 
+    int x = 0;
     while (true) {
         MEVENT mouse;
         mousemask(ALL_MOUSE_EVENTS, NULL);
@@ -190,13 +192,17 @@ void view_document(vector<string> query, string name_document) {
                     if (mouse.y == LINES-8 + 1 && mouse.x >= (COLS - 9)/2 + 1 && mouse.x <= (COLS - 9)/2 +8)
                         break;
                 }
-                if (mouse.bstate & BUTTON1_CLICKED) {
-
-                }
             }
+        }
+        if (input == KEY_UP) {
+            if (x + 23 < content.size()) x++;
+        }
+        if (input == KEY_DOWN) {
+            if (x > 0) x--;
         }
         if (input == '\n')
             break; 
+        update(x, x + 23);
     }
 
     clear_scr(12, LINES - 10);
