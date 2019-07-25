@@ -2,8 +2,8 @@
 #define __FRONTEND__
 
 #include <ncurses.h>
-#include <utils.h>
 #include <Ranking.hpp>
+#include <Engine/Graphics/Colors.hpp>
 
 using namespace std;
 

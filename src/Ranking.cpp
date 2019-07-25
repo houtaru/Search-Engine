@@ -88,7 +88,7 @@ vector<int> Ranking::output(Trie &trie, vector<string> query, int k) {
                 word = i.first.substr(1, i.first.size() - 2);
                 Aho.Insert(word);            
                 df.clear();
-                for (int idText : FullyAppearance(trie, tokenizer(word, 0))) {
+                for (int idText : FullyAppearance(trie, String::split(String::to_lower(word)))) {
                     df[idText] = Aho.Value(AllText(idText));
                 }
                 w_tq = nText;
