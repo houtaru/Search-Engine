@@ -10,3 +10,5 @@ src/main.cpp
 .directory
 *.o
 main.cpp
+log.txt
+input.in
