@@ -181,6 +181,7 @@ void view_document(vector<string> query, string name_document) {
     };
 
     int x = 0;
+    update(x, x + 23);
     while (true) {
         MEVENT mouse;
         mousemask(ALL_MOUSE_EVENTS, NULL);
