@@ -1,6 +1,4 @@
 #include <Frontend.hpp>
-#include <Engine/Utils/String.hpp>
-#include <Trie.hpp>
 
 enum {
     BLACK,
@@ -195,10 +193,10 @@ void view_document(vector<string> query, string name_document) {
                 }
             }
         }
-        if (input == KEY_UP) {
+        if (input == KEY_DOWN) {
             if (x + 23 < content.size()) x++;
         }
-        if (input == KEY_DOWN) {
+        if (input == KEY_UP) {
             if (x > 0) x--;
         }
         if (input == '\n')
@@ -258,6 +256,7 @@ void Frontend::search_scr(Trie &trie, string input_search) {
 
 
     Ranking ranking;
+    Operator sperator;
     vector<string> result;
     for (auto i : ranking.output(trie, query, 5))
         result.push_back(name[i]);

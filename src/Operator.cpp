@@ -1,10 +1,10 @@
 #include <Operator.hpp> 
 
-vector<int> Operator::_And(Trie &trie, vector<string> query,int k)
+vector<int> Operator::_And(Trie &trie, vector<string> query, int k)
     {
        return ranking.output(trie, query, 5) ;
     }
-vector<int> Operator::_Or(Trie &trie, vector<string> query1,vector<string> query2,int k){
+vector<int> Operator::_Or(Trie &trie, vector<string> query1, vector<string> query2, int k){
         vector<int> result1= ranking.output(trie,query1,k) ;
         vector<int> result2 = ranking.output(trie,query2,k) ;
         result1.insert(result1.end(),result2.begin(),result2.end()) ; 
@@ -13,7 +13,7 @@ vector<int> Operator::_Or(Trie &trie, vector<string> query1,vector<string> query
         result1.resize(_min) ; 
         return result1 ;
     }
-vector<int> Operator:: _Synonym(Trie &trie, string s,int k){
+vector<int> Operator:: _Synonym(Trie &trie, string s, int k){
         ifstream fin ; 
         string temp ; 
         vector <string> synonym ; 
@@ -43,9 +43,9 @@ vector<int> Operator:: _Synonym(Trie &trie, string s,int k){
         result.resize(_min) ; 
         return result ; 
     }
-vector<int> Operator::_Minus(Trie &trie,vector<string> query, int k ){
+vector<int> Operator::_Minus(Trie &trie, vector<string> query, int k ){
         return ranking.output(trie,query,5) ; 
 }
-vector<int> Operator::_FullyAppear(Trie &trie,vector<string> query,int k){
+vector<int> Operator::_FullyAppear(Trie &trie, vector<string> query,int k){
         return ranking.output(trie,query,5) ; 
 }
