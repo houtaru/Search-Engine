@@ -28,7 +28,7 @@ bool Trie::HasText(int id) {
 }
 
 int Trie::NumberOfText() {
-    return UsedText.size();
+    return (UsedText.rbegin()) -> first + 1;
 }
 
 long long Trie::SumSquareLength(int id) {
@@ -60,40 +60,11 @@ void Trie::Insert(std::string word, int id) {
 int Trie::Search(std::string word, int id) {
     Node * p = root;
     for (char c : word) {
-        std::cerr << c << ' ' << p ->child.size() << ' ' << p -> distribution.size() << '\n';
+        //std::cerr << c << ' ' << p ->child.size() << ' ' << p -> distribution.size() << '\n';
         if (!p -> child[c]) return 0;
         p = p -> child[c];
     }
     return p -> distribution[id];
-}
-void Trie::Loading() {
-    std::ifstream fin("TextData2/___index.txt");
-    std::string filename;
-    int cnt = 0;
-    int totalChar = 0;
-    while (getline(fin, filename)) {
-        if (HasText(cnt)) {
-       //     std::cerr << "Have added " << cnt << "already\n";
-            ++cnt;
-            continue;
-        }
-        std::ifstream data("TextData2/" + filename);
-        std::string st;
-        std::string text;
-        while (getline(data, st)) {
-            for (char c : st) {
-                  if ('A' <= c && c <= 'Z') c += 32;
-                  if (('a' <= c && c <= 'z') || ('0' <= c && c <= '9') || c == ' ')
-                    text.push_back(c);
-            }
-            text.push_back(' '); 
-        }
-        AddText(cnt, text);
-    // return;
-        totalChar += text.size();
-        //cerr << "Done file " << cnt << ' ' << text.size() << '\n'; 
-        ++cnt;
-    }
 }
 
 std::map<int, int> Trie::Search(std::string word) {
@@ -118,6 +89,8 @@ void Trie::Import() {
     q.push(root);
     int cnt = 0;
     while (!q.empty()) {
+        //++cnt;
+        //std::cout << cnt << '\n';
         Node * &p = q.front();
         q.pop();
         int nChild, activeChild, nText;
@@ -140,8 +113,39 @@ void Trie::Import() {
     //std::cout << "All words = " << cnt << '\n';
 }
 
+
+bool Trie::Loading() {
+    std::ifstream fin("TextData2/___index.txt");
+    std::string filename;
+    int cnt = 0;
+    int totalChar = 0;
+    bool isChanged = false;
+    while (getline(fin, filename)) {
+        if (HasText(cnt)) {
+       //     std::cerr << "Have added " << cnt << "already\n";
+            ++cnt;
+            continue;
+        }
+        std::ifstream data("TextData2/" + filename);
+        std::string st;
+        std::string text;
+        while (getline(data, st)) {
+            for (char c : st) {
+                isChanged = true;
+                if ('A' <= c && c <= 'Z') c += 32;
+                if (('a' <= c && c <= 'z') || ('0' <= c && c <= '9') || c == ' ')
+                text.push_back(c);
+            }
+            text.push_back(' '); 
+        }
+        AddText(cnt, text);
+        totalChar += text.size();
+        ++cnt;
+    }
+    return isChanged;
+}
+
 void Trie::Export() {
-    system("mkdir Data/");
     std::ofstream fout("Data/Trie.data");
     if (!root) {
         fout << 0 << ' ' << 0 << '\n';
@@ -164,7 +168,7 @@ void Trie::Export() {
         fout << '\n'; 
         for (int i = 0; i < p -> child.size(); ++i) if (p -> child[i]) q.push(p -> child[i]);
     }
-    std::cerr << "Total Node on trie: " << cnt << '\n';
+    //std::cerr << "Total Node on trie: " << cnt << '\n';
 }
 
 std::vector < std::string > Trie::auto_suggestion(std::string text, int lim) {
@@ -195,6 +199,9 @@ Aho_Corasick::Node::Node() {}
 Aho_Corasick::Node::Node(int nChild, Node * par, int par_id): par(par), par_id(par_id) {
     child.resize(nChild, nullptr);
     go.resize(nChild, nullptr);
+    cntLeaf = 0;
+    if (par) depth = par -> depth + 1;
+    else depth = 0;
 }
 
 Aho_Corasick::Node::~Node() {}
@@ -206,6 +213,7 @@ void Aho_Corasick::Insert(std::string word) {
         p = p -> child[c];
     }   
     p -> cntLeaf++;
+   // std::cout << '\n';
 }
 
 Aho_Corasick::Node * Aho_Corasick::Go(Node * v, int id) {
@@ -233,11 +241,41 @@ int Aho_Corasick::Value(std::string text) {
     Node * p = root;
     int ans = 0;
     for (char c : text) {
-        p = Go(p, c);
+        p = p -> child[c];
+        if (!p) p = root;
         ans += p ->cntLeaf;
     }
     return ans;
 }
+using namespace std;
+
+int Aho_Corasick::ValueTrace(std::string text, std::vector<int> &appear, int numchar) {
+    Node * p = root;
+    int id = 0;
+    int ans = 0, now = 0, pos = std::min(numchar, (int)text.size());
+    std::vector<int> disappear(appear.size() + 1, 0);
+    // system(("echo " + std::to_string(appear.size()) + " >> log.txt").c_str());
+    for (char c : text) if (0 <= c && c < nChild) {
+        p = p -> child[c];
+        if (!p) p = root;
+        if (p -> cntLeaf) {
+            system(("echo " + to_string(p -> cntLeaf) + ' ' + to_string(id) + ' ' + to_string(p -> depth) + " >> log.txt").c_str());
+            appear[id - p -> depth + 1]++;
+            disappear[id + 1]++;
+        }
+        now += p -> cntLeaf;
+        if (id >= numchar) now -= appear[id - numchar];
+        if (ans <= now) {
+            ans = now;
+            pos = id;
+        }
+        ++id;
+    }
+    if (appear.size()) appear[0] -= disappear[0];
+    for (int i = 1; i < id; ++i) appear[i] += appear[i - 1] - disappear[i];
+    return pos;
+}
+
 
 void Aho_Corasick::BuildSumSuffix(Node * p) {
     if (p == nullptr) p = root;

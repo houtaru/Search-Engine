@@ -17,7 +17,7 @@ void EngineGlobals::init() {
 	EngineGlobals::Screen::center_vertically   = true;
 
 	EngineGlobals::Screen::show_borders  = true;
-	EngineGlobals::Screen::fancy_borders = true;
+	EngineGlobals::Screen::fancy_borders = false;
 	EngineGlobals::Screen::outer_border  = true;
 
 	EngineGlobals::Theme::text        = Colors::pair("white", "default", true);

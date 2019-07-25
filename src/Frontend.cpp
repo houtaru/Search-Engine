@@ -1,4 +1,17 @@
 #include <Frontend.hpp>
+#include <Engine/Utils/String.hpp>
+#include <Trie.hpp>
+
+enum {
+    BLACK,
+    RED,
+    GREEN,
+    YELLOW,
+    BLUE,
+    MAGENTA,
+    CYAN,
+    WHITE
+};
 
 void Frontend::draw_rectangle(int x1, int y1, int height, int width) {
     attron(A_BOLD);
@@ -24,40 +37,82 @@ void Frontend::draw_rectangle(int x1, int y1, int height, int width) {
 void Frontend::draw_logo(int x1, int x2) {  //  x1, x2 is the coordinate according to the center of the screen
     attron(A_BOLD);
     vector<string> logo = {
-        "   ___                                             ",
-        "  /   |                                            ",
-        " / /| | _ __   __ _  _ __    __ _   ___  _ __  ___ ",
-        "/ /_| || '__| / _` || '_ \\  / _` | / _ \\| '__|/ __|",
-        "\\___  || |   | (_| || | | || (_| ||  __/| |   \\__ \\",
-        "    |_/|_|    \\__,_||_| |_| \\__, | \\___||_|   |___/",
-        "                             __| |                 ",
-        "                            |____/                 "
+        "   ___                                            ",
+        "  /   |                                           ",
+        " / /| | _ __  __ _  _ __    __ _   ___  _ __  ___ ",
+        "/ /_| || '__|/ _` || '_ \\  / _` | / _ \\| '__|/ __|",
+        "\\___  || |  | (_| || | | || (_| ||  __/| |   \\__ \\",
+        "    |_/|_|   \\__,_||_| |_| \\__, | \\___||_|   |___/",
+        "                            __| |                 ",
+        "                           |____/                 "
     };
-    for (int i = 0; i < (int)logo.size(); ++i)
-        mvprintw(LINES/2 - logo.size() + x1 + i, COLS/2 - logo[0].size()/2 + x2, logo[i].c_str());
+    for (int i = 0; i < (int)logo.size(); ++i) {
+        //  Draw 4
+        attron(COLOR_PAIR(BLUE));
+        for (int j = 0; j < 7; ++j) {
+            mvaddch(LINES/2 - logo.size() + x1 + i, COLS/2 - logo[0].size()/2 + x2 + j, logo[i][j]);
+        }
+        attroff(COLOR_PAIR(BLUE));
+
+        //  Draw r
+        attron(COLOR_PAIR(RED));
+        for (int j = 7; j < 13; ++j) {
+            mvaddch(LINES/2 - logo.size() + x1 + i, COLS/2 - logo[0].size()/2 + x2 + j, logo[i][j]);
+        }
+        attroff(COLOR_PAIR(RED));
+
+        //  Draw a
+        attron(COLOR_PAIR(YELLOW));
+        for (int j = 13; j < 19; ++j) {
+            mvaddch(LINES/2 - logo.size() + x1 + i, COLS/2 - logo[0].size()/2 + x2 + j, logo[i][j]);
+        }
+        attroff(COLOR_PAIR(YELLOW));
+
+        //  Draw n
+        attron(COLOR_PAIR(GREEN));
+        for (int j = 19; j < 26; ++j) {
+            mvaddch(LINES/2 - logo.size() + x1 + i, COLS/2 - logo[0].size()/2 + x2 + j, logo[i][j]);
+        }
+        attroff(COLOR_PAIR(GREEN));
+
+        //  Draw g
+        attron(COLOR_PAIR(BLUE));
+        for (int j = 26; j < 33; ++j) {
+            mvaddch(LINES/2 - logo.size() + x1 + i, COLS/2 - logo[0].size()/2 + x2 + j, logo[i][j]);
+        }
+        attroff(COLOR_PAIR(BLUE));
+
+        //  Draw e
+        attron(COLOR_PAIR(RED));
+        for (int j = 33; j < 39; ++j) {
+            mvaddch(LINES/2 - logo.size() + x1 + i, COLS/2 - logo[0].size()/2 + x2 + j, logo[i][j]);
+        }
+        attroff(COLOR_PAIR(RED));
+
+        //  Draw r
+        attron(COLOR_PAIR(YELLOW));
+        for (int j = 39; j < 45; ++j) {
+            mvaddch(LINES/2 - logo.size() + x1 + i, COLS/2 - logo[0].size()/2 + x2 + j, logo[i][j]);
+        }
+        attroff(COLOR_PAIR(YELLOW));
+
+        //  Draw s
+        attron(COLOR_PAIR(GREEN));
+        for (int j = 45; j < 50; ++j) {
+            mvaddch(LINES/2 - logo.size() + x1 + i, COLS/2 - logo[0].size()/2 + x2 + j, logo[i][j]);
+        }
+        attroff(COLOR_PAIR(GREEN));
+    }
+    attron(COLOR_PAIR(YELLOW));
+    mvaddch(LINES/2 - logo.size() + x1 + 4, COLS/2 - logo[0].size()/2 + x2 + 12, logo[4][12]);
+    attroff(COLOR_PAIR(YELLOW));
+        //mvprintw(LINES/2 - logo.size() + x1 + i, COLS/2 - logo[0].size()/2 + x2, logo[i].c_str());
     refresh();
     attroff(A_BOLD);
 }
 
 
-void get_query(char *input_search) {
-    move(LINES/2, (COLS - 75)/2 + 1);   //  Set the cursor to be in the Search rectangle
-    curs_set(1);    //  Set cursor visible
-    echo();
-    getstr(input_search);
-    noecho();
-    curs_set(0);
-}
-
-
-void reset() {
-    for (int i = 0; i < 74; ++i)
-        mvaddch(LINES/2, (COLS - 75)/2 + i+1, ' ');
-    refresh();
-}
-
-
-void clear_scr(int x1, int x2) {
+void clear_scr(int x1, int x2) {    //  Clear row x1 to x2
     for (int i = x1; i <= x2; ++i)
         for (int j = 5; j <= COLS - 5; ++j)
             mvaddch(i, j, ' ');
@@ -68,17 +123,28 @@ void view_document(vector<string> query, string name_document) {
     clear_scr(12, LINES - 10);
     attron(A_BOLD);
 
+    attron(COLOR_PAIR(MAGENTA));
     mvprintw(13, (COLS - name_document.size())/2, name_document.c_str());
+    attroff(COLOR_PAIR(MAGENTA));
+    attron(COLOR_PAIR(CYAN));
     mvprintw(LINES-8 + 1, (COLS - 9)/2 + 1, "  BACK  ");
+    attroff(COLOR_PAIR(CYAN));
 
     attroff(A_BOLD);
 
     ifstream fin("TextData2/" + name_document);
-    vector<string> content;
-    string sub;
-    while (fin >> sub)
-        content.push_back(sub);
+    // Store word and isEndline
+    vector< pair<string, bool> > content;
+    string st, sub;
+    while (getline(fin, st)){
+        stringstream ss(st);
+        while (ss >> sub)
+            content.push_back(make_pair(sub, 0));
+        content.push_back(make_pair(" ", 1));
+    }
     fin.close();
+
+    
 
     //  row: current row
     //  length_row: the current length on the current row
@@ -86,9 +152,9 @@ void view_document(vector<string> query, string name_document) {
     //  position: next position to print content[i]
     int row = 1, length_row = 0, position = 54, index = 0;
     while (index < content.size() && row < 23) {
-        length_row = position + content[index].size()+1 - 49;
+        length_row = position + content[index].first.size()+1 - 49;
 
-        if (length_row > 100) {
+        if (length_row > 100 || (index && content[index - 1].second)) {
             ++row;
             if (row >= 23) 
                 break;
@@ -98,15 +164,15 @@ void view_document(vector<string> query, string name_document) {
 
         bool compare = false;
         //  Compare content[index] to query. If it is, bolding it
-        for (auto i : tokenizer(content[index]))
+        for (auto i : String::split(String::to_lower(content[index].first)))
             for (auto j : query)
-                if (i.compare(j) == 0) {
+                if (String::to_lower(i).compare(String::to_lower(j)) == 0) {
                     compare = true;
                     attron(A_BOLD); attron(A_REVERSE);
                     break;
                 }
-        mvprintw(15 + row, position, content[index].c_str());
-        position += content[index].size() + 1;
+        mvprintw(15 + row, position, content[index].first.c_str());
+        position += content[index].first.size() + 1;
         ++index;
         if (compare) {
             attroff(A_BOLD); attroff(A_REVERSE);
@@ -124,13 +190,17 @@ void view_document(vector<string> query, string name_document) {
                     if (mouse.y == LINES-8 + 1 && mouse.x >= (COLS - 9)/2 + 1 && mouse.x <= (COLS - 9)/2 +8)
                         break;
                 }
+                if (mouse.bstate & BUTTON1_CLICKED) {
+
+                }
             }
         }
+        if (input == '\n')
+            break; 
     }
 
     clear_scr(12, LINES - 10);
 }
-
 
 enum {
     DOCUMENT1,
@@ -147,27 +217,30 @@ void mouse_search_scr(int &current_pointer, int x, int y, vector<string> result)
         current_pointer = BACK;
     else {
         for (int i = DOCUMENT1; i <= DOCUMENT5; ++i) 
-            if (x == 13 + 5*i && y >= 70 && y <= 70 + result[i].size()-1) {
-                current_pointer = i;
-                break;
-            }
+            if (!result[i].empty())
+                if (x == 13 + 5*i && y >= 70 && y <= 70 + result[i].size()-1) {
+                    current_pointer = i;
+                    break;
+                }
     }
-
 }
 
 
-void Frontend::search_scr(Trie &trie, char *input_search) {
+void Frontend::search_scr(Trie &trie, string input_search) {
     clear_scr(3, LINES - 3); 
     MEVENT mouse;
     mousemask(ALL_MOUSE_EVENTS, NULL);
 
     draw_logo(- LINES/2 + 8 + 3, - COLS/2 + 51/2 + 15); //  8 == logo.size() and 51 == logo[0].size()
     draw_rectangle(6, 76, 2, 75);    //  Draw SEARCH_BAR besides the logo
-    for (int i = 0; i < strlen(input_search); ++i)
-        mvaddch(7, 76+1 + i, input_search[i]);
+    mvprintw(7, 76+1, input_search.c_str());
 
-    vector<string> query = tokenizer(input_search);
-
+    vector<string> query =  String::split(String::to_lower(input_search));
+    for (string & term : query) {
+        if (term[0] == '"' && term.back() == '"' && term.size() >= 2) {
+            term = term.substr(1, (int)term.size() - 2);
+        }
+    }
     //  Get name of documents
     vector<string> name;
     ifstream fin("TextData2/___index.txt");
@@ -190,14 +263,54 @@ void Frontend::search_scr(Trie &trie, char *input_search) {
         //  Print result and BACK content
         for (int i = 0; i < size; ++i) {
             attron(A_BOLD);
-            if (i == size - 1)
+            if (i == size - 1) {
+                attron(COLOR_PAIR(CYAN));
                 mvprintw(LINES-8 + 1, (COLS - 9)/2 + 1, result[i].c_str());
+                attroff(COLOR_PAIR(CYAN));
+            }
             else {
-                attron(A_UNDERLINE);
+                attron(A_UNDERLINE | COLOR_PAIR(MAGENTA));
                 mvprintw(13 + 5*i, 70, result[i].c_str());
-                attroff(A_UNDERLINE);
+                attroff(A_UNDERLINE | COLOR_PAIR(MAGENTA));
             }
             attroff(A_BOLD); 
+        }
+        if (size == 1) { //  No matching result
+            attron(A_BLINK | A_BOLD | COLOR_PAIR(RED));
+            mvprintw(LINES/2, (COLS - 21)/2, "NO MATCHING RESULT!!!");
+            attroff(A_BLINK | A_BOLD | COLOR_PAIR(RED));
+        }
+
+       
+          // Show some thing
+        Aho_Corasick Aho(256);
+        for (auto x : query) {
+     //       system(("echo " + x + " >> log.txt").c_str());
+            Aho.Insert(x);
+        }
+        for (int i = 0; i < size - 1; ++i) {
+            int numchar = 210;
+            ifstream data("TextData2/" + result[i]);
+            string st, temp;
+            while (data >> temp) {
+                for (char c : temp) if (0 <= c && c < 256) {
+                    if ('A' <= c && c <= 'Z') c += 32;
+                    st.push_back(c);
+                }
+                st.push_back(' ');
+            }
+            vector<int> appear(st.size(), 0);
+            int r = Aho.ValueTrace(st, appear, numchar) + 1;
+            int l = max(0, r - numchar);
+            for (int _ = l; _ < r; _ += 70) {
+                for (int j = _; j < min(_ + 70, r); ++j) {
+                    string c; c.push_back(st[j]);
+                    if (appear[j]) { attron(A_BOLD); attron(A_REVERSE); }
+                    mvprintw(14 + (_ - l) / 70 + 5 * i, 75 + (j - _), c.c_str());
+                    if (appear[j]) { attroff(A_BOLD); attroff(A_REVERSE); }
+                }
+                // break;
+            }
         }
 
 
@@ -208,22 +321,26 @@ void Frontend::search_scr(Trie &trie, char *input_search) {
                 if (getmouse(&mouse) == OK) {
                     if (mouse.bstate & BUTTON1_CLICKED) {
                         mouse_search_scr(current_pointer, mouse.y, mouse.x, result);
-
                         switch (current_pointer) {
                             case DOCUMENT1:
-                                view_document(query, result[0]);
+                                if (size > 1)
+                                    view_document(query, result[0]);
                                 break;
                             case DOCUMENT2:
-                                view_document(query, result[1]);
+                                if (size > 2)
+                                    view_document(query, result[1]);
                                 break;
                             case DOCUMENT3:
-                                view_document(query, result[2]);
+                                if (size > 3)
+                                    view_document(query, result[2]);
                                 break;
                             case DOCUMENT4:
-                                view_document(query, result[3]);
+                                if (size > 4)
+                                    view_document(query, result[3]);
                                 break;
                             case DOCUMENT5:
-                                view_document(query, result[4]);
+                                if (size > 5)
+                                    view_document(query, result[4]);
                                 break;
                             case BACK:
                                 exit_while = true;
@@ -233,9 +350,14 @@ void Frontend::search_scr(Trie &trie, char *input_search) {
                         current_pointer = -1;   //  Reset current pointer
                     }
                 }
+                break;
             }
+            case '\n':
+                exit_while = true;
+                break;
         }
 
+       
         if (exit_while) //  If user choose BACK
             break;
 
@@ -268,6 +390,52 @@ void mouse_main_scr(int &current_pointer, int x, int y) {
 }
 
 
+void get_query(string &input_search, int &current_pointer, int x, int y, int width) {
+    move(x, y);   //  Set the cursor to be in the Search rectangle
+    curs_set(1);    //  Set cursor visible
+
+    MEVENT mouse;
+    mousemask(ALL_MOUSE_EVENTS, NULL);
+    int a = x, b = y;
+    while (true) {
+        int temp = getch();
+        if (temp == '\n') {
+            current_pointer = SEARCH_BUTTON;
+            break;
+        }
+        if (temp == KEY_MOUSE) {
+            if (getmouse(&mouse) == OK) {
+                if (mouse.bstate & BUTTON1_CLICKED) {
+                    mouse_main_scr(current_pointer, mouse.y, mouse.x);
+                    if (current_pointer != SEARCH_BAR)
+                        break;
+                    else
+                        continue;
+                }
+            }
+        }
+        if ((temp == 127 || temp == 263) && b > y) {   //  If user press BACKSPACE
+            mvaddch(a, --b, ' ');
+            if (!input_search.empty())
+                input_search.pop_back();
+            move(a, b);
+        } else if (temp >= 32 && temp <= 126 && b < y + 75) {    //  User have to input a query with length < 75
+            input_search.push_back((char)temp);
+            mvaddch(a, b++, temp);
+        }
+    }
+
+    curs_set(0);
+}
+
+
+void reset() {
+    for (int i = 0; i < 74; ++i)
+        mvaddch(LINES/2, (COLS - 75)/2 + i+1, ' ');
+    refresh();
+}
+
+
 void Frontend::main_scr(Trie &trie) {
     MEVENT mouse;
     mousemask(ALL_MOUSE_EVENTS, NULL);
@@ -278,49 +446,45 @@ void Frontend::main_scr(Trie &trie) {
         "   RESET    ",
         "    QUIT    "
     };
-    int current_pointer = -1, size = 4;   //  size is the number of rectangles
+    int current_pointer = SEARCH_BAR;
     while (true) {
-        draw_logo(-2, 0);
+        draw_logo(-4, 0);
         draw_rectangle(LINES/2 - 1, (COLS - 75)/2, 2, 75);  //  Draw SEARCH_BAR
         draw_rectangle(LINES/2 - 1, (COLS + 75 + 5)/2, 2, 13);  //  Draw SEARCH_BUTTON
         draw_rectangle(LINES/2 + 4, COLS/2 - 20, 2, 13);    //  Draw RESET
         draw_rectangle(LINES/2 + 4, COLS/2 + 7, 2, 13);    //  Draw QUIT
 
         //  Print content for rectangles
-        attron(A_BOLD);
+        attron(A_BOLD | COLOR_PAIR(CYAN)); //Colors::pairActivate(stdscr, YELLOW);
         mvprintw(LINES/2, (COLS + 75 + 5)/2 + 1, content[SEARCH_BUTTON].c_str());
         mvprintw(LINES/2 + 5, COLS/2 - 19, content[RESET].c_str());
         mvprintw(LINES/2 + 5, COLS/2 + 8, content[QUIT].c_str());
-        attroff(A_BOLD);
+        attroff(A_BOLD | COLOR_PAIR(CYAN)); //Colors::pairDeactivate(stdscr, YELLOW);
         refresh();
 
 
-        int input = getch();
         bool exit_while = false;
-        switch (input) {
-            case KEY_MOUSE: {
-                if (getmouse(&mouse) == OK)
-                    if (mouse.bstate & BUTTON1_CLICKED) {
-                        mouse_main_scr(current_pointer, mouse.y, mouse.x);
-
-                        char input_search[100];
-                        switch (current_pointer) {
-                            case SEARCH_BAR:
-                                get_query(input_search);
-                                break;
-                            case SEARCH_BUTTON:
-                                search_scr(trie, input_search);
-                                input_search[0] = '\0';
-                                break;
-                            case RESET:
-                                reset();
-                                input_search[0] = '\0';
-                                break;
-                            case QUIT:
-                                exit_while = true;
-                                break;
-                        }
-                    }
+        string input_search; 
+        Loop:switch (current_pointer) {
+            case SEARCH_BAR: {
+                get_query(input_search, current_pointer, LINES/2, (COLS-75)/2 + 1, 74);
+            }
+                goto Loop;
+            case SEARCH_BUTTON: {
+                search_scr(trie, input_search);
+                current_pointer = SEARCH_BAR;
+                input_search.clear();
+                break;
+            }
+            case RESET: {
+                reset();
+                current_pointer = SEARCH_BAR;
+                input_search.clear();
+                break;
+            }
+            case QUIT: {
+                exit_while = true;
+                break;
             }
         }
 
@@ -341,18 +505,29 @@ void Frontend::loading_scr() {
     keypad(stdscr, TRUE);
     curs_set(0);    //  Set cursor invisible
 
+    //  Initialize color
+    start_color();
+    init_pair(BLACK, COLOR_BLACK, COLOR_BLACK);
+    init_pair(RED, COLOR_RED, COLOR_BLACK);
+    init_pair(GREEN, COLOR_GREEN, COLOR_BLACK);
+    init_pair(YELLOW, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(BLUE, COLOR_BLUE, COLOR_BLACK);
+    init_pair(MAGENTA, COLOR_MAGENTA, COLOR_BLACK);
+    init_pair(CYAN, COLOR_CYAN, COLOR_BLACK);
+    init_pair(WHITE, COLOR_WHITE, COLOR_BLACK);
     
     draw_rectangle(0, 0, LINES - 1, COLS - 1);  //  Draw main window
-    draw_logo(-2, 0);
-    attron(A_BLINK); attron(A_BOLD);
+    draw_logo(-4, 0);
+    attron(A_BLINK | A_BOLD | COLOR_PAIR(MAGENTA));
     mvprintw(LINES/2, (COLS - 7)/2, "LOADING");
-    attroff(A_BLINK); attroff(A_BOLD);
+    attroff(A_BLINK | A_BOLD | COLOR_PAIR(MAGENTA));
     refresh();
 
     Trie trie(256);
     trie.Import();
-
-    clear_scr(3, LINES - 3);
+    if (trie.Loading()) trie.Export();
+    
+    clear_scr(LINES/2, LINES - 3);  //  7 is the logo.size()
     refresh();
     main_scr(trie);
 }

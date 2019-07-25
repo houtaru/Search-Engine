@@ -33,7 +33,9 @@ public:
     // Import Trie from file
     void Import();
     
-    void Loading() ;
+    // Loading all text from folder TextData2
+    bool Loading(); 
+    
     // Export Trie to file
     void Export();
     
@@ -57,6 +59,7 @@ private:
         Node * par, *link;
         int par_id;
         int cntLeaf;
+        int depth;
         Node();
         Node(int nChild, Node * par, int par_id);
         ~Node();
@@ -79,6 +82,9 @@ public:
     void Insert(std::string word);
     // Find the number appear all words in text
     int Value(std::string text);
+    // Turn on chars which need to BOLD and REVERSE at vector appear and return (l..r) has largest value
+    int ValueTrace(std::string text, std::vector<int> &appear, int numcher);
+
 };
 
 #endif // __TRIE__

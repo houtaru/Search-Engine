@@ -21,6 +21,7 @@ std::string String::trim(const std::string &str) {
     return ltrim(rtrim(str));
 }
 
+
 std::vector < std::string > String::split(const std::string& str, char delim, bool flag) {
     std::stringstream ss(str);          // buffers
     std::string item;                   // current thing
@@ -33,7 +34,7 @@ std::vector < std::string > String::split(const std::string& str, char delim, bo
             for (int i = 0; i < item.size(); ++i) if (isalnum(item[i])) {
                 res += item[i];
             } else {
-                if (std::string("-$#*").find(item[i]) != std::string::npos) {
+                if (std::string("-$#*\"").find(item[i]) != std::string::npos) {
                     res += item[i];
                 } else if (i + 2 < item.size() && item[i] == '.' && item[i + 1] == '.') {
                     res += item[i] + item[++i];
@@ -43,4 +44,9 @@ std::vector < std::string > String::split(const std::string& str, char delim, bo
         elements.push_back(res);
     }
     return elements;
+}
+
+std::string String::to_lower(std::string str) {
+    boost::algorithm::to_lower(str);
+    return str;
 }

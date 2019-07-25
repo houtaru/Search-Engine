@@ -62,7 +62,7 @@ void Window::print(std::string str, int x, int y, ColorPair p) {
     if (!str.empty()) {
         mvwaddstr(this->win, y, x, str.c_str());
     }
-    Colors::pairDeactive(this->win, p);
+    Colors::pairDeactivate(this->win, p);
 }
 
 void Window::print(std::vector < std::string > lines, int x, int y, ColorPair p) {
@@ -73,7 +73,7 @@ void Window::print(std::vector < std::string > lines, int x, int y, ColorPair p)
 void Window::printChar(int c, int x, int y, ColorPair p) {
     Colors::pairActivate(this->win, p);
     mvwaddch(this->win, y, x, c);
-    Colors::pairDeactive(this->win, p);
+    Colors::pairDeactivate(this->win, p);
 }
 
 void Window::setBackground(chtype ch, ColorPair p) {
@@ -84,7 +84,8 @@ void Window::refresh() {
     // wrefresh(this->win) gets heavy to do the former.
     // So I use wnoutrefresh(this->win).
     // @note You need to call `refresh()` at the end of every draw cycle.
-    wnoutrefresh(this->win);
+    //wnoutrefresh(this->win);
+    wrefresh(this->win);
 }
 
 void Window::clear() {
@@ -134,5 +135,5 @@ void Window::setBorders() {
 void Window::horizontalLine(int x, int y, int c, int width, ColorPair p) {
     Colors::pairActivate(this->win, p);
     mvwhline(this->win, y, x, c, width);
-    Colors::pairDeactive(this->win, p);
+    Colors::pairDeactivate(this->win, p);
 }

@@ -5,6 +5,9 @@
 #include <vector>
 #include <stdexcept>
 #include <sstream>
+#include <algorithm>
+
+#include <boost/algorithm/string.hpp>
 
 // Utilities of `std::string`
 namespace String {
@@ -50,6 +53,8 @@ namespace String {
     // Splits #str according to #delim.
     // @return A vector of string, without the delimiter.
     std::vector < std::string > split(const std::string& str, char delim = ' ', bool flag = false);
+
+    std::string to_lower(std::string str);
 }
 
 #endif
