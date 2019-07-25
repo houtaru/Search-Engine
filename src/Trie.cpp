@@ -60,7 +60,7 @@ void Trie::Insert(std::string word, int id) {
 int Trie::Search(std::string word, int id) {
     Node * p = root;
     for (char c : word) {
-        std::cerr << c << ' ' << p ->child.size() << ' ' << p -> distribution.size() << '\n';
+        //std::cerr << c << ' ' << p ->child.size() << ' ' << p -> distribution.size() << '\n';
         if (!p -> child[c]) return 0;
         p = p -> child[c];
     }
@@ -241,7 +241,8 @@ int Aho_Corasick::Value(std::string text) {
     Node * p = root;
     int ans = 0;
     for (char c : text) {
-        p = Go(p, c);
+        p = p -> child[c];
+        if (!p) p = root;
         ans += p ->cntLeaf;
     }
     return ans;
