@@ -236,7 +236,11 @@ void Frontend::search_scr(Trie &trie, string input_search) {
     mvprintw(7, 76+1, input_search.c_str());
 
     vector<string> query =  String::split(String::to_lower(input_search));
-
+    for (string & term : query) {
+        if (term[0] == '"' && term.back() == '"' && term.size() >= 2) {
+            term = term.substr(1, (int)term.size() - 2);
+        }
+    }
     //  Get name of documents
     vector<string> name;
     ifstream fin("TextData2/___index.txt");

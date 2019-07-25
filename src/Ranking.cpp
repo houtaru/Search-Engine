@@ -116,6 +116,5 @@ vector<int> Ranking::output(Trie &trie, vector<string> query, int k) {
             heap.insert(pair<double, int>(score[i], i));
         }
     }
-
     return heap.topk_result(k);
 }
