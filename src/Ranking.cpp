@@ -77,6 +77,7 @@ vector<int> Ranking::output(Trie &trie, vector<string> query, int k) {
         if (isMinus(word)) {
             w_tq = -nText;
             word.erase(word.begin());
+ //           cerr << word << endl;exit(0);
         }
         map<int, int> df = trie.Search(word);
         

@@ -89,6 +89,8 @@ void Trie::Import() {
     q.push(root);
     int cnt = 0;
     while (!q.empty()) {
+        //++cnt;
+        //std::cout << cnt << '\n';
         Node * &p = q.front();
         q.pop();
         int nChild, activeChild, nText;
@@ -197,6 +199,9 @@ Aho_Corasick::Node::Node() {}
 Aho_Corasick::Node::Node(int nChild, Node * par, int par_id): par(par), par_id(par_id) {
     child.resize(nChild, nullptr);
     go.resize(nChild, nullptr);
+    cntLeaf = 0;
+    if (par) depth = par -> depth + 1;
+    else depth = 0;
 }
 
 Aho_Corasick::Node::~Node() {}
@@ -208,6 +213,7 @@ void Aho_Corasick::Insert(std::string word) {
         p = p -> child[c];
     }   
     p -> cntLeaf++;
+   // std::cout << '\n';
 }
 
 Aho_Corasick::Node * Aho_Corasick::Go(Node * v, int id) {
@@ -240,6 +246,35 @@ int Aho_Corasick::Value(std::string text) {
     }
     return ans;
 }
+using namespace std;
+
+int Aho_Corasick::ValueTrace(std::string text, std::vector<int> &appear, int numchar) {
+    Node * p = root;
+    int id = 0;
+    int ans = 0, now = 0, pos = std::min(numchar, (int)text.size());
+    std::vector<int> disappear(appear.size() + 1, 0);
+    // system(("echo " + std::to_string(appear.size()) + " >> log.txt").c_str());
+    for (char c : text) if (0 <= c && c < nChild) {
+        p = p -> child[c];
+        if (!p) p = root;
+        if (p -> cntLeaf) {
+            system(("echo " + to_string(p -> cntLeaf) + ' ' + to_string(id) + ' ' + to_string(p -> depth) + " >> log.txt").c_str());
+            appear[id - p -> depth + 1]++;
+            disappear[id + 1]++;
+        }
+        now += p -> cntLeaf;
+        if (id >= numchar) now -= appear[id - numchar];
+        if (ans <= now) {
+            ans = now;
+            pos = id;
+        }
+        ++id;
+    }
+    if (appear.size()) appear[0] -= disappear[0];
+    for (int i = 1; i < id; ++i) appear[i] += appear[i - 1] - disappear[i];
+    return pos;
+}
+
 
 void Aho_Corasick::BuildSumSuffix(Node * p) {
     if (p == nullptr) p = root;

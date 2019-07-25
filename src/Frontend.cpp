@@ -1,4 +1,6 @@
 #include <Frontend.hpp>
+#include <Engine/Utils/String.hpp>
+#include <Trie.hpp>
 
 enum {
     BLACK,
@@ -131,10 +133,15 @@ void view_document(vector<string> query, string name_document) {
     attroff(A_BOLD);
 
     ifstream fin("TextData2/" + name_document);
-    vector<string> content;
-    string sub;
-    while (getline(fin, sub))
-        content.push_back(sub);
+    // Store word and isEndline
+    vector< pair<string, bool> > content;
+    string st, sub;
+    while (getline(fin, st)){
+        stringstream ss(st);
+        while (ss >> sub)
+            content.push_back(make_pair(sub, 0));
+        content.push_back(make_pair(" ", 1));
+    }
     fin.close();
 
     
@@ -145,9 +152,9 @@ void view_document(vector<string> query, string name_document) {
     //  position: next position to print content[i]
     int row = 1, length_row = 0, position = 54, index = 0;
     while (index < content.size() && row < 23) {
-        length_row = position + content[index].size()+1 - 49;
+        length_row = position + content[index].first.size()+1 - 49;
 
-        if (length_row > 100) {
+        if (length_row > 100 || (index && content[index - 1].second)) {
             ++row;
             if (row >= 23) 
                 break;
@@ -157,15 +164,15 @@ void view_document(vector<string> query, string name_document) {
 
         bool compare = false;
         //  Compare content[index] to query. If it is, bolding it
-        for (auto i : String::split(String::to_lower(content[index])))
+        for (auto i : String::split(String::to_lower(content[index].first)))
             for (auto j : query)
-                if (i.compare(j) == 0) {
+                if (String::to_lower(i).compare(String::to_lower(j)) == 0) {
                     compare = true;
                     attron(A_BOLD); attron(A_REVERSE);
                     break;
                 }
-        mvprintw(15 + row, position, content[index].c_str());
-        position += content[index].size() + 1;
+        mvprintw(15 + row, position, content[index].first.c_str());
+        position += content[index].first.size() + 1;
         ++index;
         if (compare) {
             attroff(A_BOLD); attroff(A_REVERSE);
@@ -194,7 +201,6 @@ void view_document(vector<string> query, string name_document) {
 
     clear_scr(12, LINES - 10);
 }
-
 
 enum {
     DOCUMENT1,
@@ -271,24 +277,38 @@ void Frontend::search_scr(Trie &trie, string input_search) {
             attroff(A_BLINK | A_BOLD | COLOR_PAIR(RED));
         }
 
-        // Show some thing
+       
+          // Show some thing
+        Aho_Corasick Aho(256);
+        for (auto x : query) {
+     //       system(("echo " + x + " >> log.txt").c_str());
+            Aho.Insert(x);
+        }
         for (int i = 0; i < size - 1; ++i) {
             int numchar = 210;
             ifstream data("TextData2/" + result[i]);
             string st, temp;
             while (data >> temp) {
-                for (char c : temp) st.push_back(c);
+                for (char c : temp) if (0 <= c && c < 256) {
+                    if ('A' <= c && c <= 'Z') c += 32;
+                    st.push_back(c);
+                }
                 st.push_back(' ');
-                if (st.size() >= numchar) break;
             }
-            
-            for (int _ = 0; _ < min(numchar, (int)st.size()); _ += 70) {
-                int remain = (int)st.size() - _; 
-                string sub = st.substr(_, min(remain, 70));
-                mvprintw(14 + (_ / 70) + 5 * i, 75, sub.c_str());
+            vector<int> appear(st.size(), 0);
+            int r = Aho.ValueTrace(st, appear, numchar) + 1;
+            int l = max(0, r - numchar);
+            for (int _ = l; _ < r; _ += 70) {
+                for (int j = _; j < min(_ + 70, r); ++j) {
+                    string c; c.push_back(st[j]);
+                    if (appear[j]) { attron(A_BOLD); attron(A_REVERSE); }
+                    mvprintw(14 + (_ - l) / 70 + 5 * i, 75 + (j - _), c.c_str());
+                    if (appear[j]) { attroff(A_BOLD); attroff(A_REVERSE); }
+                }
                 // break;
             }
         }
+
 
         int input = getch();
         bool exit_while = false;
@@ -333,6 +353,7 @@ void Frontend::search_scr(Trie &trie, string input_search) {
                 break;
         }
 
+       
         if (exit_while) //  If user choose BACK
             break;
 
