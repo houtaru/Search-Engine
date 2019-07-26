@@ -195,11 +195,11 @@ void view_document(vector<string> query, string name_document) {
                 }
             }
         }
-        if (input == KEY_UP) {
-            if (x + 23 < content.size()) x--;
-        }
         if (input == KEY_DOWN) {
-            if (x > 0) x++;
+            if (x + 23 < content.size()) x++;
+        }
+        if (input == KEY_UP) {
+            if (x > 0) x--;
         }
         if (input == '\n')
             break; 
@@ -242,12 +242,11 @@ void Frontend::search_scr(Trie &trie, string input_search) {
     draw_rectangle(6, 76, 2, 75);    //  Draw SEARCH_BAR besides the logo
     mvprintw(7, 76+1, input_search.c_str());
 
-    vector<string> query =  String::split(String::to_lower(input_search));
-    for (string & term : query) {
-        if (term[0] == '"' && term.back() == '"' && term.size() >= 2) {
-            term = term.substr(1, (int)term.size() - 2);
-        }
-    }
+    vector<string> query =  String::split(input_search);
+    // for (auto it : query)
+    //     cerr << it << endl;
+    // exit(0);
+    
     //  Get name of documents
     vector<string> name;
     ifstream fin("TextData2/___index.txt");
@@ -256,9 +255,9 @@ void Frontend::search_scr(Trie &trie, string input_search) {
         name.push_back(sub);
     fin.close();
 
-    Ranking ranking;
+    Operator OPERATOR;
     vector<string> result;
-    for (auto i : ranking.output(trie, query, 5))
+    for (auto i : OPERATOR._Processing(trie, query, 5))
         result.push_back(name[i]);
     result.push_back("  BACK  ");
 
@@ -287,7 +286,11 @@ void Frontend::search_scr(Trie &trie, string input_search) {
             attroff(A_BLINK | A_BOLD | COLOR_PAIR(RED));
         }
 
-       
+        for (string & term : query) {
+            if (term[0] == '"' && term.back() == '"' && term.size() >= 2) {
+                term = term.substr(1, (int)term.size() - 2);
+            }
+        }
           // Show some thing
         Aho_Corasick Aho(256);
         for (auto x : query) {

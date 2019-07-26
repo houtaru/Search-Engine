@@ -21,36 +21,40 @@ std::string String::trim(const std::string &str) {
     return ltrim(rtrim(str));
 }
 
-
 std::vector < std::string > String::split(const std::string& str, char delim, bool flag) {
-    std::string stopwords = "I a about an are as at be by com for from how in is it of on or that the this to was what when where who will with the www";
+    //std::string stopwords = "I a about an are as at be by com for from how in is it of on or that the this to was what when where who will with the www";
 
     std::vector < std::string > result;
     std::string cur;
     
     for (int i = 0; i < str.size(); ++i) {
-        if (str[i] == '\"') {
+        if (i + 2 < str.size() && str[i] == 'A' && str[i + 1] == 'N' && str[i + 2] == 'D') {
+            result.push_back(str.substr(i, 3));
+            i += 2;
+        } else if (i + 1 < str.size() && str[i] == 'O' && str[i + 1] == 'R') {
+            result.push_back(str.substr(i, 2));
+            i += 1;
+        } else if (str[i] == '\"') {
             if (!cur.empty()) {
-                result.push_back(cur);
+                result.push_back(to_lower(cur));
             }
-            if (stopwords.find(cur) == std::string::npos) {
-                cur.clear();
-            }
+            cur = str[i];
             while (++i < str.size() && str[i] != '\"') cur += str[i];
-            if (!cur.empty()) result.push_back(cur);
+            cur += str[i];
+            if (!cur.empty()) result.push_back(to_lower(cur));
             cur.clear();
         } else if (str[i] == ' ') {
-            if (stopwords.find(cur) == std::string::npos && !cur.empty()) {
-                result.push_back(cur);
+            if (!cur.empty()) {
+                result.push_back(to_lower(cur));
             }
             cur.clear();
-        } else if (isalnum(str[i]) || std::string("-$#*\"").find(str[i]) != std::string::npos) {
+        } else if (isalnum(str[i]) || std::string("~+:-$#*\"").find(str[i]) != std::string::npos) {
             cur += str[i];
         } else if (i + 2 < str.size() && str[i] == '.' && str[i + 1] == '.') {
             cur += str[i]; cur += str[++i];
         }
     }
-    if (!cur.empty()) result.push_back(cur);
+    if (!cur.empty()) result.push_back(to_lower(cur));
     return result;
 }
 

@@ -47,12 +47,8 @@ string AllText(int idText) {
     return result;
 }
 
-// If query minus
-bool isMinus(string word) {
-    return (word[0] == '-');
-}
 
-vector<int> Ranking::output(Trie &trie, vector<string> query, int k) {
+vector<int> Ranking::output(Trie &trie, vector<string> query, int k, set<int> &minus, set<int> &plus) {
     nText = trie.NumberOfText();
     // MAP is the list of distinct terms in query
     map<string, int> MAP;
@@ -72,13 +68,9 @@ vector<int> Ranking::output(Trie &trie, vector<string> query, int k) {
     for (auto i : MAP) {
         double w_tq = weight_query(trie, i.first, i.second);
         string word = i.first;
-
-        // Case -united
-        if (isMinus(word)) {
-            w_tq = -nText;
-            word.erase(word.begin());
-        }
+        
         map<int, int> df = trie.Search(word);
+        
         
         // Case "Manchester United"
         if (i.first[0] == '"' && i.first.back() == '"') {
@@ -87,7 +79,7 @@ vector<int> Ranking::output(Trie &trie, vector<string> query, int k) {
                 word = i.first.substr(1, i.first.size() - 2);
                 Aho.Insert(word);            
                 df.clear();
-                for (int idText : FullyAppearance(trie, String::split(String::to_lower(word)))) {
+                for (int idText : FullyAppearance(trie, String::split(word))) {
                     df[idText] = Aho.Value(AllText(idText));
                 }
                 w_tq = nText;
@@ -96,11 +88,11 @@ vector<int> Ranking::output(Trie &trie, vector<string> query, int k) {
         
         //  Get the number of documents containing term and number of terms in those documents
         for (auto j : df) {
-            //  Compute dot producgt of vector q and vector d
+            //  Compute dot product of vector q and vector d
             ++number_terms[j.first];
-            score[j.first] += w_tq * (1 + log(j.second * 1.0));
+            if (minus.find(j.first) == minus.end() && (plus.empty() || (!plus.empty() && plus.find(j.first) != plus.end())))
+                score[j.first] += w_tq * (1 + log(j.second * 1.0));\
         }
-     //   cerr << nText << ' '; exit(0);
         
     }
 

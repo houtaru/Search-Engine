@@ -6,9 +6,11 @@ data
 Data
 TextData
 TextData2
+Synonym_data
 src/main.cpp
 .directory
 *.o
 main.cpp
 log.txt
+log
 input.in
