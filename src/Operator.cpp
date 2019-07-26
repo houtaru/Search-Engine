@@ -1,5 +1,7 @@
 #include <Operator.hpp> 
 
+Operator::Operator(vector<string> sub) { type = sub; }
+
 //  Merge 2 results into a single result
 vector<int> merge(vector<int> result1, vector<int> result2, int k) {
     result1.insert(result1.end(),result2.begin(),result2.end()) ; 
@@ -11,7 +13,7 @@ vector<int> merge(vector<int> result1, vector<int> result2, int k) {
 
 
 //  AND, $, #, " " operator
-vector<int> Operator::_And(Trie &trie, vector<string> &query, int k, set<int> &minus, set<int> &plus){
+vector<int> Operator::_And(Trie &trie, vector<string> &query, int k){
     return ranking.output(trie, query, k, minus, plus) ;
 }
 
@@ -25,7 +27,7 @@ vector<int> Operator::_Or(Trie &trie, vector<string> &query1, vector<string> &qu
 
 
 //  List of documents of synonym of string s
-vector<int> Operator:: _Synonym(Trie &trie, vector<string> &query, int index, int k, set<int> &minus, set<int> &plus) {
+vector<int> Operator:: _Synonym(Trie &trie, vector<string> &query, int index, int k) {
     ifstream fin ; 
     string temp ; 
     vector <string> synonym ; 
@@ -74,13 +76,41 @@ vector<int> Operator::_Processing(Trie &trie, vector<string> &query, int k) {
             return result = merge(result, _Or(trie, query1, query2, k), k);
         }
     }
+
+    int count = 0, index_type = 0;
+    for (int i = 0; i < (int)query.size(); ++i) {
+        if (query[i].substr(0, 9) == "filetype:") {
+            ++count;
+            index_type = i; 
+        }
+        if (count > 1)
+            return result;
+    }
+    if (count == 1) {
+        query[index_type].erase(query[index_type].begin(), query[index_type].begin() + 9);
+        for (int i = 0; i < (int)type.size(); ++i) {
+            if (type[i] == query[index_type]) {
+                plus.insert(i);
+            }
+        }
+        query.erase(query.begin()+index_type);
+        if (query.empty()) {
+            auto it = plus.begin();
+            for (int i = 0; i < min(5, (int)plus.size()); ++i) {
+                result.push_back(*it);
+                ++it;
+            }
+            return result;
+        }
+    }
+
     int index = 0;
-    set<int> minus, plus;
     while (index < (int)query.size()) {
         if (query[index] == "AND") {    //  If query contains "AND", delete that term
             query.erase(query.begin() + index);
             --index;
         }
+
 
         if (query[index][0] == '-' || query[index][0] == '+' || query[index][0] == '~') {   //  If query[index] begins with sign operator
             char temp_char = query[index][0];
@@ -97,13 +127,13 @@ vector<int> Operator::_Processing(Trie &trie, vector<string> &query, int k) {
             }
 
             if (temp_char == '~') {   //  The Synonym operator case
-                result = merge(result, _Synonym(trie, query, index, k, minus, plus), k);
+                result = merge(result, _Synonym(trie, query, index, k), k);
                 query.erase(query.begin() + index);
                 --index;
             }
         }
         ++index;
     }
-    result = merge(result, ranking.output(trie, query, k, minus, plus), k);
+    result = merge(result, _And(trie, query, k), k);
     return result;
 }
