@@ -2,6 +2,8 @@
 #include <Engine/Graphics/Ncurses.hpp>
 #include <Engine/Utils/String.hpp>
 #include <ncurses.h>
+#include <Frontend.hpp>
+
 
 using namespace std;
 
@@ -114,15 +116,17 @@ void viewDocument(vector<string> query, string name_document) {
 }
 
 int main() {
-    try {
-        Ncurses::init();
-        vector <string> query = {"administration"};
-        viewDocument(query, "input.in");
-        Ncurses::exit();
-    } catch (...) {
-        Ncurses::exit();
-        throw "Error";
-    }
+    Frontend frontend;
+    frontend.loading_scr();
+    // try {
+    //     Ncurses::init();
+    //     vector <string> query = {"administration"};
+    //     viewDocument(query, "input.in");
+    //     Ncurses::exit();
+    // } catch (...) {
+    //     Ncurses::exit();
+    //     throw "Error";
+    // }
     
     return 0;
 }

@@ -53,6 +53,7 @@ bool isMinus(string word) {
 }
 
 vector<int> Ranking::output(Trie &trie, vector<string> query, int k) {
+    
     nText = trie.NumberOfText();
     // MAP is the list of distinct terms in query
     map<string, int> MAP;
