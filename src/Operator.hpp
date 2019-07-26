@@ -23,7 +23,7 @@ public:
     vector<int> _And(Trie &trie, vector<string> &query, int k);
 
     //  OR Operator
-    vector<int> _Or(vector<string> &query1, vector<string> &query2, int k );
+    vector<int> _Or(Trie &trie, vector<string> &query1, vector<string> &query2, int k );
 
     //  Synonym Operator
     vector<int> _Synonym(Trie &trie, vector<string> &query, int index, int k); 
@@ -32,7 +32,7 @@ public:
     set<int> _Minus_Plus(Trie &trie, string s, int k);
 
     //  Query processing
-    vector<int> _Processing(vector<string> &query, int k, bool is_intitle = false);
+    vector<int> _Processing(Trie &trie, vector<string> &query, int k);
 };
 
 

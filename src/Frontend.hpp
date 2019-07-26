@@ -13,8 +13,8 @@ struct Frontend {
     void draw_rectangle(int x1, int y1, int x2, int y2);
     void draw_logo(int x1, int x2);
     
-    void search_scr(Operator &op, string input_search);
-    void main_scr(Operator &op);
+    void search_scr(Trie &trie, string input_search);
+    void main_scr(Trie &trie);
     void loading_scr();
 };
 

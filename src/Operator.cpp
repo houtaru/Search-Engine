@@ -19,9 +19,9 @@ vector<int> Operator::_And(Trie &trie, vector<string> &query, int k){
 
 
 //  List of documents when combining query1 OR query 2
-vector<int> Operator::_Or(vector<string> &query1, vector<string> &query2, int k) {
-    vector<int> result1= _Processing(query1,k) ;
-    vector<int> result2 = _Processing(query2,k) ;
+vector<int> Operator::_Or(Trie &trie, vector<string> &query1, vector<string> &query2, int k) {
+    vector<int> result1= _Processing(trie,query1,k) ;
+    vector<int> result2 = _Processing(trie,query2,k) ;
     return merge(result1, result2, k);
 }
 
@@ -64,7 +64,7 @@ set<int> Operator::_Minus_Plus(Trie &trie, string s, int k ) {
 }
 
 
-vector<int> Operator::_Processing(vector<string> &query, int k, bool is_intitle) {
+vector<int> Operator::_Processing(Trie &trie, vector<string> &query, int k) {
     vector<int> result;
 
     for (int i = 0; i < (int)query.size(); ++i) {
@@ -73,7 +73,7 @@ vector<int> Operator::_Processing(vector<string> &query, int k, bool is_intitle)
             vector<string> query1(query.begin(), query.begin()+i);
             query.erase(query.begin()+i);
 
-            return result = merge(result, _Or(query1, query2, k), k);
+            return result = merge(result, _Or(trie, query1, query2, k), k);
         }
     }
 
@@ -117,7 +117,7 @@ vector<int> Operator::_Processing(vector<string> &query, int k, bool is_intitle)
             query[index].erase(query[index].begin());   //  Remove the '-' or '+' or '~'
 
             if (temp_char == '-' || temp_char == '+') {   //  The Minus or Plus operator case
-                set<int> temp_set = _Minus_Plus(is_intitle ? trie_title : trie, query[index], k);
+                set<int> temp_set = _Minus_Plus(trie, query[index], k);
                 for (auto it : temp_set) {
                     if (temp_char == '-')
                         minus.insert(it);
@@ -132,7 +132,6 @@ vector<int> Operator::_Processing(vector<string> &query, int k, bool is_intitle)
                 --index;
             }
         }
-
         ++index;
     }
     result = merge(result, _And(trie, query, k), k);

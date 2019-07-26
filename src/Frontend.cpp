@@ -119,7 +119,7 @@ void clear_scr(int x1, int x2) {    //  Clear row x1 to x2
 }
 
 
-void view_document(vector<string> query, string name_document, bool is_intitle = false) {
+void view_document(vector<string> query, string name_document) {
     clear_scr(12, LINES - 10);
     attron(A_BOLD);
 
@@ -137,8 +137,8 @@ void view_document(vector<string> query, string name_document, bool is_intitle =
     vector <string> cur;
     string curl; while (getline(fin, curl, '\n')) cur.push_back(curl);
     vector <string> content;
-    for (int i = 0; i < cur.size(); ++i) {
-        string tmp = cur[i];
+    for (auto it : cur) {
+        string tmp = it;
         while (tmp.size() > 100) {
             int pos = 99; while (tmp[pos] != ' ' && tmp[pos] != '.' && tmp[pos] != ',') pos--;
             content.push_back(tmp.substr(0, pos + 1));
@@ -151,13 +151,11 @@ void view_document(vector<string> query, string name_document, bool is_intitle =
     // content[i][k...nxt[i][k] - 1] equal to one of element in #query.
     vector < vector <int> > nxt(content.size());
     for (int i = 0; i < content.size(); ++i) {
-        nxt[i].assign(content[i].size(), 0);
-        
-        for (int k = 0; k < content[i].size(); ++k) {
+        nxt[i].resize(content[i].size());
+        for (int k = 0; k < content[i].size(); ++k) 
             for (auto it : query) if (String::to_lower(content[i].substr(k, it.size())).compare(it) == 0) {
                 nxt[i][k] = max(nxt[i][k], int(it.size() + k));
             }
-        }
     }
 
     // Update content when client press KEY_UP or KEY_DOWN
@@ -236,7 +234,7 @@ void mouse_search_scr(int &current_pointer, int x, int y, vector<string> result)
 }
 
 
-void Frontend::search_scr(Operator &OPERATOR, string input_search) {
+void Frontend::search_scr(Trie &trie, string input_search) {
     clear_scr(3, LINES - 3); 
     MEVENT mouse;
     mousemask(ALL_MOUSE_EVENTS, NULL);
@@ -261,7 +259,7 @@ void Frontend::search_scr(Operator &OPERATOR, string input_search) {
 
     Operator OPERATOR(type);
     vector<string> result;
-    for (auto i : OPERATOR._Processing(query, 5))
+    for (auto i : OPERATOR._Processing(trie, query, 5))
         result.push_back(name[i]);
     result.push_back("  BACK  ");
 
@@ -451,7 +449,7 @@ void reset() {
 }
 
 
-void Frontend::main_scr(Operator &op) {
+void Frontend::main_scr(Trie &trie) {
     MEVENT mouse;
     mousemask(ALL_MOUSE_EVENTS, NULL);
 
@@ -486,7 +484,7 @@ void Frontend::main_scr(Operator &op) {
             }
                 goto Loop;
             case SEARCH_BUTTON: {
-                search_scr(op, input_search);
+                search_scr(trie, input_search);
                 current_pointer = SEARCH_BAR;
                 input_search.clear();
                 break;
@@ -545,5 +543,5 @@ void Frontend::loading_scr() {
     if (trie.Loading()) trie.Export();
     clear_scr(LINES/2, LINES - 3);  //  7 is the logo.size()
     refresh();
-    main_scr(OPERATOR);
+    main_scr(trie);
 }
