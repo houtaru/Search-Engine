@@ -35,8 +35,8 @@ void viewDocument(vector<string> query, string name_document) {
 
     attroff(A_BOLD);
 
-
     ifstream fin("input.in");
+
     vector <string> cur;
     string curl; while (getline(fin, curl, '\n'))
         cur.push_back(curl);
@@ -51,6 +51,8 @@ void viewDocument(vector<string> query, string name_document) {
         content.push_back(tmp);
     }
 
+    // Pre-calculate #nxt array - the rightmost position that 
+    // content[i][k...nxt[i][k] - 1] equal to one of element in #query.
     vector < vector <int> > nxt(content.size());
     for (int i = 0; i < content.size(); ++i) {
         nxt[i].resize(content[i].size());
@@ -60,12 +62,14 @@ void viewDocument(vector<string> query, string name_document) {
             }
     }
 
+    // Update content when client press KEY_UP or KEY_DOWN
     auto update = [&](int l, int r) {
         clearScr(16, LINES - 10);
+        r = min(r, int(content.size()));
         for (int i = l; i < r; ++i) {
-            if (content[i].empty()) continue;
+            if (content[i].empty() || int(nxt[i].size()) > 1e5 || int(nxt[i].size()) < 0) continue;
             int pos = 54;
-            for (int k = 0; k < content[i].size(); ++k) {
+            for (int k = 0; k < nxt[i].size(); ++k) {
                 if (!nxt[i][k]) mvaddch(15 + (i - l + 1), pos++, content[i][k]);
                 else {
                     int sz = nxt[i][k] - k;
@@ -81,6 +85,7 @@ void viewDocument(vector<string> query, string name_document) {
     };
 
     int x = 0;
+    update(x, x + 23);
     while (true) {
         MEVENT mouse;
         mousemask(ALL_MOUSE_EVENTS, NULL);
@@ -94,26 +99,24 @@ void viewDocument(vector<string> query, string name_document) {
                 }
             }
         }
-        if (input == KEY_DOWN) {
-            if (x + 23 < content.size()) x++;
-        }
         if (input == KEY_UP) {
-            if (x > 0) x--;
+            if (x + 23 < content.size()) x--;
+        }
+        if (input == KEY_DOWN) {
+            if (x > 0) x++;
         }
         if (input == '\n')
             break; 
         update(x, x + 23);
-        refresh();
     }
 
     clearScr(12, LINES - 10);
 }
 
-
 int main() {
     try {
         Ncurses::init();
-        vector <string> query = {"lost since"};
+        vector <string> query = {"administration"};
         viewDocument(query, "input.in");
         Ncurses::exit();
     } catch (...) {
@@ -123,3 +126,11 @@ int main() {
     
     return 0;
 }
+
+// #include <Frontend.hpp>
+
+// int main() {
+//     Frontend frontend;
+//     frontend.loading_scr();
+//     return 0;
+// }
