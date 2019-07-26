@@ -135,8 +135,7 @@ void view_document(vector<string> query, string name_document) {
     ifstream fin("TextData2/" + name_document);
 
     vector <string> cur;
-    string curl; while (getline(fin, curl, '\n'))
-        cur.push_back(curl);
+    string curl; while (getline(fin, curl, '\n')) cur.push_back(curl);
     vector <string> content;
     for (auto it : cur) {
         string tmp = it;
@@ -161,6 +160,8 @@ void view_document(vector<string> query, string name_document) {
 
     // Update content when client press KEY_UP or KEY_DOWN
     auto update = [&](int l, int r) {
+        r = min(r, (int) content.size());
+        
         clear_scr(16, LINES - 10);
         for (int i = l; i < r; ++i) {
             if (content[i].empty()) continue;
@@ -195,11 +196,11 @@ void view_document(vector<string> query, string name_document) {
                 }
             }
         }
-        if (input == KEY_DOWN) {
-            if (x + 23 < content.size()) x++;
-        }
         if (input == KEY_UP) {
             if (x > 0) x--;
+        }
+        if (input == KEY_DOWN) {
+            if (x + 23 < content.size()) x++;
         }
         if (input == '\n')
             break; 
@@ -243,10 +244,6 @@ void Frontend::search_scr(Trie &trie, string input_search) {
     mvprintw(7, 76+1, input_search.c_str());
 
     vector<string> query =  String::split(input_search);
-    // for (auto it : query)
-    //     cerr << it << endl;
-    // exit(0);
-
     //  Get name of documents
     vector<string> name;
     ifstream fin("TextData2/___index.txt");
@@ -255,12 +252,18 @@ void Frontend::search_scr(Trie &trie, string input_search) {
         name.push_back(sub);
     fin.close();
 
-    Operator OPERATOR;
+    Ranking ranking;
     vector<string> result;
-    for (auto i : OPERATOR._Processing(trie, query, 5))
+    for (auto i : ranking.output(trie, query, 5))
         result.push_back(name[i]);
     result.push_back("  BACK  ");
 
+
+    for (string & term : query) {
+        if (term[0] == '"' && term.back() == '"' && term.size() >= 2) {
+            term = term.substr(1, (int)term.size() - 2);
+        }
+    }
 
     int current_pointer = -1, size = (int)result.size();
     while (true) {
@@ -286,11 +289,7 @@ void Frontend::search_scr(Trie &trie, string input_search) {
             attroff(A_BLINK | A_BOLD | COLOR_PAIR(RED));
         }
 
-        for (string & term : query) {
-            if (term[0] == '"' && term.back() == '"' && term.size() >= 2) {
-                term = term.substr(1, (int)term.size() - 2);
-            }
-        }
+       
           // Show some thing
         Aho_Corasick Aho(256);
         for (auto x : query) {
@@ -535,7 +534,6 @@ void Frontend::loading_scr() {
     Trie trie(256);
     trie.Import();
     if (trie.Loading()) trie.Export();
-    
     clear_scr(LINES/2, LINES - 3);  //  7 is the logo.size()
     refresh();
     main_scr(trie);
