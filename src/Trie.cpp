@@ -196,7 +196,36 @@ std::vector < std::string > Trie::auto_suggestion(std::string text, int lim) {
 void Trie::Intitle() {
     // Check if TrieIntitle exist or not
     std::ifstream fin("Data/TrieIntitle.data");
-    if (fin.is_open()) return;
+    if (fin.is_open()) {
+         std::queue<Node *> q;
+        q.push(root);
+        int cnt = 0;
+        while (!q.empty()) {
+            //++cnt;
+            //std::cout << cnt << '\n';
+            Node * &p = q.front();
+            q.pop();
+            int nChild, activeChild, nText;
+            fin >> nChild >> activeChild >> nText;
+            if (!p) p = new Node(nChild);
+            for (int i = 0; i < activeChild; ++i) {
+                int id;
+                fin >> id;
+                p -> child[id] = new Node(nChild);
+            }
+            for (int i = 0; i < nText; ++i) {
+                int id, val;
+                fin >> id >> val;
+                UsedText[id] += 1ll * val * val;
+            //   ++cnt;
+                p -> distribution[id] = val;
+            }
+            for (int i = 0; i < nChild; ++i) if (p -> child[i]) q.push(p -> child[i]);
+        }
+        fin.close();
+        return;
+    }
+    fin.close();
 
     fin.open("TextData2/___index.txt");
     std::string filename;
