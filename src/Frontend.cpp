@@ -28,8 +28,8 @@ enum {
     WHITE
 };
 
-void Frontend::draw_rectangle(int x1, int y1, int height, int width) {
-    attron(A_BOLD);
+void draw_rectangle(int x1, int y1, int height, int width, bool is_bold = true) {
+    if (is_bold) attron(A_BOLD);
     int x2 = x1 + height, y2 = y1 + width;
     for (int i = x1; i <= x2; ++i) {
         mvaddch(i, y1, ACS_VLINE);
@@ -45,7 +45,7 @@ void Frontend::draw_rectangle(int x1, int y1, int height, int width) {
     mvaddch(x2, y1, ACS_LLCORNER);
     mvaddch(x2, y2, ACS_LRCORNER);
     refresh();
-    attroff(A_BOLD);
+    if (is_bold) attroff(A_BOLD);
 }
 
 
@@ -398,7 +398,7 @@ enum {
 }; 
 
 void mouse_main_scr(int &current_pointer, int x, int y) {
-    if (x == LINES/2 + 5) {
+    if (x == LINES/2 + 5 + 4) {
         if (y >= COLS/2 - 19 && y <= COLS/2 - 8)
             current_pointer = RESET;
         else if (y >= COLS/2 + 8 && y <= COLS/2 + 19)
@@ -413,16 +413,62 @@ void mouse_main_scr(int &current_pointer, int x, int y) {
 }
 
 
-void get_query(string &input_search, int &current_pointer, int x, int y, int width) {
+void get_query(string &input_search, int &current_pointer, int x, int y, int width, Trie& trie) {
     move(x, y);   //  Set the cursor to be in the Search rectangle
     curs_set(1);    //  Set cursor visible
+    keypad(stdscr, true);
 
+    string word, pre_word;
+    std::vector < std::string > suggests;
+    
     MEVENT mouse;
     mousemask(ALL_MOUSE_EVENTS, NULL);
-    int a = x, b = y;
+    int a = x, b = y, ptr = 0, lim = 6;
+    bool can_suggest = false;
+
+    auto updateSuggest = [&] (int ptr) {
+        // clear auto suggest screen
+        for (int i = LINES / 2 + 2; i <= LINES / 2 + 2 + 4; ++i)
+            for (int j = (COLS - 75) / 2 + 1; j < (COLS - 75) / 2 + 75; ++j)
+                mvaddch(i, j, ' ');
+
+        curs_set(0);
+        for (int i = 1; i <= suggests.size(); ++i) {
+            string temp = input_search.substr(0, input_search.size() - word.size()) + suggests[i - 1];
+            if (i == ptr) attron(A_REVERSE);
+            mvprintw(LINES / 2 + i + 1, y, temp.c_str());
+            if (i == ptr) attroff(A_REVERSE);
+        }
+        refresh();
+        move(a, b);
+        curs_set(1);
+    };
+    
     while (true) {
+        //Display auto suggestion
+        if (!word.empty() && word != pre_word) {
+            system(("echo " + pre_word + " " + word + " >> log").c_str());
+            
+            suggests = trie.auto_suggestion(word, lim - 1);
+            if (suggests[0].compare("null") != 0) {
+                ptr = 0;
+                lim = suggests.size() + 1;
+                can_suggest = true;
+                
+                curs_set(0);
+                draw_rectangle(LINES/2 + 1, (COLS - 75)/2, 6, 75, false);
+                updateSuggest(ptr);
+
+            } else can_suggest = false;
+            curs_set(1);
+            pre_word = word;
+        }
+
         int temp = getch();
         if (temp == '\n') {
+            if (ptr != 0) {
+                input_search = input_search.substr(0, input_search.size() - word.size()) + suggests[ptr - 1];
+            }
             current_pointer = SEARCH_BUTTON;
             break;
         }
@@ -437,17 +483,43 @@ void get_query(string &input_search, int &current_pointer, int x, int y, int wid
                 }
             }
         }
+        if (temp == KEY_UP) {
+            ptr = (ptr - 1 + lim) % lim;
+            if (can_suggest) {
+                updateSuggest(ptr);
+            }
+        } else if (temp == KEY_DOWN) {
+            ptr = (ptr + 1) % lim;
+            if (can_suggest) updateSuggest(ptr);
+        }
         if ((temp == 127 || temp == 263) && b > y) {   //  If user press BACKSPACE
+            // clear auto suggest screen
+            
+            for (int i = LINES / 2 + 2; i <= LINES / 2 + 2 + 4; ++i)
+                for (int j = (COLS - 75) / 2 + 1; j < (COLS - 75) / 2 + 75; ++j)
+                    mvaddch(i, j, ' ');
+            
             mvaddch(a, --b, ' ');
             if (!input_search.empty())
                 input_search.pop_back();
+            if (!word.empty()) word.pop_back();
+            else {
+                int x = input_search.find_last_of(' ');
+                if (x != string::npos) word = input_search.substr(x + 1);
+                else if (input_search.size()) word = input_search;
+            }
             move(a, b);
         } else if (temp >= 32 && temp <= 126 && b < y + 75) {    //  User have to input a query with length < 75
+            ptr = 0;
             input_search.push_back((char)temp);
+            if (temp == ' ') {
+                word.clear();
+            } else {
+                word += char(temp);
+            }
             mvaddch(a, b++, temp);
         }
     }
-
     curs_set(0);
 }
 
@@ -474,14 +546,14 @@ void Frontend::main_scr(Trie &trie, Trie& trie_title) {
         draw_logo(-4, 0);
         draw_rectangle(LINES/2 - 1, (COLS - 75)/2, 2, 75);  //  Draw SEARCH_BAR
         draw_rectangle(LINES/2 - 1, (COLS + 75 + 5)/2, 2, 13);  //  Draw SEARCH_BUTTON
-        draw_rectangle(LINES/2 + 4, COLS/2 - 20, 2, 13);    //  Draw RESET
-        draw_rectangle(LINES/2 + 4, COLS/2 + 7, 2, 13);    //  Draw QUIT
+        draw_rectangle(LINES/2 + 4 + 4, COLS/2 - 20, 2, 13);    //  Draw RESET
+        draw_rectangle(LINES/2 + 4 + 4, COLS/2 + 7, 2, 13);    //  Draw QUIT
 
         //  Print content for rectangles
         attron(A_BOLD | COLOR_PAIR(CYAN)); //Colors::pairActivate(stdscr, YELLOW);
         mvprintw(LINES/2, (COLS + 75 + 5)/2 + 1, content[SEARCH_BUTTON].c_str());
-        mvprintw(LINES/2 + 5, COLS/2 - 19, content[RESET].c_str());
-        mvprintw(LINES/2 + 5, COLS/2 + 8, content[QUIT].c_str());
+        mvprintw(LINES/2 + 5 + 4, COLS/2 - 19, content[RESET].c_str());
+        mvprintw(LINES/2 + 5 + 4, COLS/2 + 8, content[QUIT].c_str());
         attroff(A_BOLD | COLOR_PAIR(CYAN)); //Colors::pairDeactivate(stdscr, YELLOW);
         refresh();
 
@@ -490,7 +562,7 @@ void Frontend::main_scr(Trie &trie, Trie& trie_title) {
         string input_search; 
         Loop:switch (current_pointer) {
             case SEARCH_BAR: {
-                get_query(input_search, current_pointer, LINES/2, (COLS-75)/2 + 1, 74);
+                get_query(input_search, current_pointer, LINES/2, (COLS-75)/2 + 1, 74, trie);
             }
                 goto Loop;
             case SEARCH_BUTTON: {
