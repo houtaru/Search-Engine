@@ -135,8 +135,7 @@ void view_document(vector<string> query, string name_document) {
     ifstream fin("TextData2/" + name_document);
 
     vector <string> cur;
-    string curl; while (getline(fin, curl, '\n'))
-        cur.push_back(curl);
+    string curl; while (getline(fin, curl, '\n')) cur.push_back(curl);
     vector <string> content;
     for (auto it : cur) {
         string tmp = it;
@@ -198,10 +197,10 @@ void view_document(vector<string> query, string name_document) {
             }
         }
         if (input == KEY_UP) {
-            if (x + 23 < content.size()) x--;
+            if (x > 0) x--;
         }
         if (input == KEY_DOWN) {
-            if (x > 0) x++;
+            if (x + 23 < content.size()) x++;
         }
         if (input == '\n')
             break; 
