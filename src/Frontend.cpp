@@ -161,9 +161,11 @@ void view_document(vector<string> query, string name_document) {
 
     // Update content when client press KEY_UP or KEY_DOWN
     auto update = [&](int l, int r) {
+        r = min(r, (int) content.size());
+        
         clear_scr(16, LINES - 10);
         for (int i = l; i < r; ++i) {
-            if (content[i].empty() || int(nxt[i].size()) > 1e5 || int(nxt[i].size()) < 0) continue;
+            if (content[i].empty()) continue;
             int pos = 54;
             for (int k = 0; k < nxt[i].size(); ++k) {
                 if (!nxt[i][k]) mvaddch(15 + (i - l + 1), pos++, content[i][k]);
