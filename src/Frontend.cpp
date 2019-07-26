@@ -2,6 +2,21 @@
 #include <Engine/Utils/String.hpp>
 #include <Trie.hpp>
 
+Frontend::Frontend() {
+    //  Get name of documents
+    ifstream fin("TextData2/___index.txt");
+    string sub;
+    while (getline(fin, sub)) {
+        name.push_back(sub);
+        size_t index = sub.find_last_of('.');
+        if (index != std::string::npos)
+            type.push_back(sub.substr(index+1));
+    }
+    fin.close();
+    cerr << name.size() << endl;
+    //exit(0);
+}
+
 enum {
     BLACK,
     RED,
@@ -245,18 +260,7 @@ void Frontend::search_scr(Trie &trie, string input_search) {
 
     vector<string> query =  String::split(input_search);
 
-    //  Get name of documents
-    vector<string> name;
-    vector<string> type;
-    ifstream fin("TextData2/___index.txt");
-    string sub;
-    while (getline(fin, sub)) {
-        name.push_back(sub);
-        int index = sub.find_last_of('.');
-        type.push_back(sub.substr(index+1, (int)sub.size() - index-1));
-    }
-    fin.close();
-
+    
     Operator OPERATOR(type);
     vector<string> result;
     for (auto i : OPERATOR._Processing(trie, query, 5))
@@ -294,7 +298,6 @@ void Frontend::search_scr(Trie &trie, string input_search) {
             attroff(A_BLINK | A_BOLD | COLOR_PAIR(RED));
         }
 
-       
           // Show some thing
         Aho_Corasick Aho(256);
         for (auto x : query) {
@@ -535,6 +538,7 @@ void Frontend::loading_scr() {
     mvprintw(LINES/2, (COLS - 7)/2, "LOADING");
     attroff(A_BLINK | A_BOLD | COLOR_PAIR(MAGENTA));
     refresh();
+
 
     Trie trie(256);
     //Trie trie_title(256);
