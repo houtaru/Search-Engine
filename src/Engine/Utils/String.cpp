@@ -48,10 +48,10 @@ std::vector < std::string > String::split(const std::string& str, char delim, bo
                 result.push_back(to_lower(cur));
             }
             cur.clear();
-        } else if (isalnum(str[i]) || std::string("~+:-$#*\"").find(str[i]) != std::string::npos) {
-            cur += str[i];
         } else if (i + 2 < str.size() && str[i] == '.' && str[i + 1] == '.') {
             cur += str[i]; cur += str[++i];
+        } else if (isalnum(str[i]) || std::string("!?~+:-$#*\".").find(str[i]) != std::string::npos) {
+            cur += str[i];
         }
     }
     if (!cur.empty()) result.push_back(to_lower(cur));

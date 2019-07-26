@@ -17,9 +17,9 @@ vector<int> Operator::_And(Trie &trie, vector<string> &query, int k, set<int> &m
 
 
 //  List of documents when combining query1 OR query 2
-vector<int> Operator::_Or(Trie &trie, vector<string> &query1, vector<string> &query2, int k) {
-    vector<int> result1= _Processing(trie,query1,k) ;
-    vector<int> result2 = _Processing(trie,query2,k) ;
+vector<int> Operator::_Or(vector<string> &query1, vector<string> &query2, int k) {
+    vector<int> result1= _Processing(query1,k) ;
+    vector<int> result2 = _Processing(query2,k) ;
     return merge(result1, result2, k);
 }
 
@@ -62,7 +62,7 @@ set<int> Operator::_Minus_Plus(Trie &trie, string s, int k ) {
 }
 
 
-vector<int> Operator::_Processing(Trie &trie, vector<string> &query, int k) {
+vector<int> Operator::_Processing(vector<string> &query, int k, bool is_intitle) {
     vector<int> result;
 
     for (int i = 0; i < (int)query.size(); ++i) {
@@ -71,9 +71,20 @@ vector<int> Operator::_Processing(Trie &trie, vector<string> &query, int k) {
             vector<string> query1(query.begin(), query.begin()+i);
             query.erase(query.begin()+i);
 
-            return result = merge(result, _Or(trie, query1, query2, k), k);
+            return result = merge(result, _Or(query1, query2, k), k);
         }
     }
+    
+    if (!is_intitle) {
+        bool intitle = false;
+        for (int index = 0; index < query.size(); ++index) 
+            if (query[index].substr(0, 8) == "intitle:") {
+                query[index].erase(query[index].begin(), query[index].begin()+8);
+                intitle = true;
+            }
+        if (intitle) return _Processing(query, k, true);
+    }
+
     int index = 0;
     set<int> minus, plus;
     while (index < (int)query.size()) {
@@ -87,7 +98,7 @@ vector<int> Operator::_Processing(Trie &trie, vector<string> &query, int k) {
             query[index].erase(query[index].begin());   //  Remove the '-' or '+' or '~'
 
             if (temp_char == '-' || temp_char == '+') {   //  The Minus or Plus operator case
-                set<int> temp_set = _Minus_Plus(trie, query[index], k);
+                set<int> temp_set = _Minus_Plus(is_intitle ? trie_title : trie, query[index], k);
                 for (auto it : temp_set) {
                     if (temp_char == '-')
                         minus.insert(it);
@@ -97,13 +108,14 @@ vector<int> Operator::_Processing(Trie &trie, vector<string> &query, int k) {
             }
 
             if (temp_char == '~') {   //  The Synonym operator case
-                result = merge(result, _Synonym(trie, query, index, k, minus, plus), k);
+                result = merge(result, _Synonym(is_intitle ? trie_title : trie, query, index, k, minus, plus), k);
                 query.erase(query.begin() + index);
                 --index;
             }
         }
+
         ++index;
     }
-    result = merge(result, ranking.output(trie, query, k, minus, plus), k);
+    result = merge(result, ranking.output(is_intitle ? trie_title : trie, query, k, minus, plus), k);
     return result;
 }
