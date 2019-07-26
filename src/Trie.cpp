@@ -47,7 +47,6 @@ void Trie::AddText(int idText, std::string text) {
 }
 
 void Trie::Insert(std::string word, int id) {
-    std::cout << word << '\n';
     Node * p = root;
     for (char c : word) {
         if (!p -> child[c]) p -> child[c] = new Node(nChild);
