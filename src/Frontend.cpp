@@ -252,9 +252,9 @@ void Frontend::search_scr(Trie &trie, string input_search) {
         name.push_back(sub);
     fin.close();
 
-    Ranking ranking;
+    Operator OPERATOR;
     vector<string> result;
-    for (auto i : ranking.output(trie, query, 5))
+    for (auto i : OPERATOR._Processing(trie, query, 5))
         result.push_back(name[i]);
     result.push_back("  BACK  ");
 
@@ -532,6 +532,8 @@ void Frontend::loading_scr() {
     refresh();
 
     Trie trie(256);
+    Trie trie_title(256);
+    trie_title.InTitle();
     trie.Import();
     if (trie.Loading()) trie.Export();
     clear_scr(LINES/2, LINES - 3);  //  7 is the logo.size()
