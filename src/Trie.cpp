@@ -194,6 +194,34 @@ std::vector < std::string > Trie::auto_suggestion(std::string text, int lim) {
     return result;
 }
 
+void Trie::Intitle() {
+    // Check if TrieIntitle exist or not
+    std::ifstream fin("Data/TrieIntitle.data");
+    if (fin.is_open()) return;
+
+    fin.open("TextData2/___index.txt");
+    std::string filename;
+    int cnt = 0;
+    while (getline(fin, filename)) {
+        if (HasText(cnt)) {
+       //     std::cerr << "Have added " << cnt << "already\n";
+            ++cnt;
+            continue;
+        }
+        std::ifstream data("TextData2/" + filename);
+        std::string st;
+        std::string text;
+
+        char c;
+        while (std::string("?!.\n").find(c = data.get()) == std::string::npos) {
+            if ('A' <= c && c <= 'Z') c += 32;
+            if (('a' <= c && c <= 'z') || ('0' <= c && c <= '9') || c == ' ') st += c;
+        }
+        Insert(st, cnt);
+        ++cnt;
+    }
+    Export();
+}
 
 Aho_Corasick::Node::Node() {}
 Aho_Corasick::Node::Node(int nChild, Node * par, int par_id): par(par), par_id(par_id) {

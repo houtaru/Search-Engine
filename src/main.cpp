@@ -1,4 +1,4 @@
-#include <bits/stdc++.h>
+/*#include <bits/stdc++.h>
 #include <Engine/Graphics/Ncurses.hpp>
 #include <Engine/Utils/String.hpp>
 #include <ncurses.h>
@@ -125,12 +125,16 @@ int main() {
     }
     
     return 0;
+}*/
+
+#include <Frontend.hpp>
+
+int main() {
+    // Frontend frontend;
+    // frontend.loading_scr();
+
+    string ss = "And OR oR AND";
+    for (auto it : String::split(ss))
+        cout << it << "\n";
+    return 0;
 }
-
-// #include <Frontend.hpp>
-
-// int main() {
-//     Frontend frontend;
-//     frontend.loading_scr();
-//     return 0;
-// }
