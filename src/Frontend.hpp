@@ -1,6 +1,7 @@
 #ifndef __FRONTEND__
 #define __FRONTEND__
 
+#include <bits/stdc++.h>
 #include <ncurses.h>
 #include <Ranking.hpp>
 #include <Engine/Graphics/Colors.hpp>
@@ -10,6 +11,13 @@
 using namespace std;
 
 struct Frontend {
+private:
+    
+    vector<string> name;
+    vector<string> type;
+
+public:
+    Frontend();
     void draw_rectangle(int x1, int y1, int x2, int y2);
     void draw_logo(int x1, int x2);
     
