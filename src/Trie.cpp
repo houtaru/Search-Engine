@@ -119,7 +119,7 @@ bool Trie::Loading() {
     std::string filename;
     int cnt = 0;
     int totalChar = 0;
-    bool isChanged = false;
+    bool isChanged = false; 
     while (getline(fin, filename)) {
         if (HasText(cnt)) {
        //     std::cerr << "Have added " << cnt << "already\n";

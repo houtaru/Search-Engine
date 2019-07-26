@@ -26,6 +26,9 @@ struct Operator
 
     //" " case
     vector<int> _FullyAppear(Trie &trie,vector<string> query,int k) ;
+
+    //Range case 
+    vector<int> _range(Trie &trie, string s, int k ) ; 
  
 };
 

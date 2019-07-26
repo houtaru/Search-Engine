@@ -258,9 +258,9 @@ void Frontend::search_scr(Trie &trie, string input_search) {
         name.push_back(sub);
     fin.close();
 
-    Ranking ranking;
+    Operator ranking;
     vector<string> result;
-    for (auto i : ranking.output(trie, query, 5))
+    for (auto i : ranking._range(trie,"1800..2000", 5))
         result.push_back(name[i]);
     result.push_back("  BACK  ");
 

@@ -16,7 +16,7 @@ enum {
     WHITE
 };
 
-void clearScr(int x1, int x2) {    //  Clear row x1 to x2
+/* void clearScr(int x1, int x2) {    //  Clear row x1 to x2
     for (int i = x1; i <= x2; ++i)
         for (int j = 5; j <= COLS - 5; ++j)
             mvaddch(i, j, ' ');
@@ -126,11 +126,12 @@ int main() {
     
     return 0;
 }
+*/
 
-// #include <Frontend.hpp>
+#include <Frontend.hpp>
 
-// int main() {
-//     Frontend frontend;
-//     frontend.loading_scr();
-//     return 0;
-// }
+int main() {
+     Frontend frontend;
+     frontend.loading_scr();
+     return 0;
+ }
