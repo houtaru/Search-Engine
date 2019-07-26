@@ -16,6 +16,8 @@ private:
     set<int> minus, plus;
     vector<string> type;
 
+    bool is_intitle = false;
+
 public:
     Operator(vector<string> sub);
 
@@ -23,7 +25,7 @@ public:
     vector<int> _And(Trie &trie, vector<string> &query, int k);
 
     //  OR Operator
-    vector<int> _Or(Trie &trie, vector<string> &query1, vector<string> &query2, int k );
+    vector<int> _Or(Trie &trie, vector<string> &query1, vector<string> &query2, int k, Trie& trie_title, bool& is_intitle);
 
     //  Synonym Operator
     vector<int> _Synonym(Trie &trie, vector<string> &query, int index, int k); 
@@ -32,7 +34,7 @@ public:
     set<int> _Minus_Plus(Trie &trie, string s, int k);
 
     //  Query processing
-    vector<int> _Processing(Trie &trie, vector<string> &query, int k);
+    vector<int> _Processing(Trie &trie, vector<string> &query, int k, Trie& trie_title, bool &is_intitle);
 };
 
 

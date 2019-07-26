@@ -19,9 +19,9 @@ vector<int> Operator::_And(Trie &trie, vector<string> &query, int k){
 
 
 //  List of documents when combining query1 OR query 2
-vector<int> Operator::_Or(Trie &trie, vector<string> &query1, vector<string> &query2, int k) {
-    vector<int> result1= _Processing(trie,query1,k) ;
-    vector<int> result2 = _Processing(trie,query2,k) ;
+vector<int> Operator::_Or(Trie &trie, vector<string> &query1, vector<string> &query2, int k, Trie& trie_title, bool& is_intitle) {
+    vector<int> result1= _Processing(trie,query1,k, trie_title, is_intitle) ;
+    vector<int> result2 = _Processing(trie,query2,k, trie_title, is_intitle) ;
     return merge(result1, result2, k);
 }
 
@@ -64,7 +64,7 @@ set<int> Operator::_Minus_Plus(Trie &trie, string s, int k ) {
 }
 
 
-vector<int> Operator::_Processing(Trie &trie, vector<string> &query, int k) {
+vector<int> Operator::_Processing(Trie &trie, vector<string> &query, int k, Trie& trie_title, bool& is_intitle) {
     vector<int> result;
 
     for (int i = 0; i < (int)query.size(); ++i) {
@@ -73,7 +73,7 @@ vector<int> Operator::_Processing(Trie &trie, vector<string> &query, int k) {
             vector<string> query1(query.begin(), query.begin()+i);
             query.erase(query.begin()+i);
 
-            return result = merge(result, _Or(trie, query1, query2, k), k);
+            return result = merge(result, _Or(trie, query1, query2, k, trie_title, is_intitle), k);
         }
     }
 
@@ -104,6 +104,13 @@ vector<int> Operator::_Processing(Trie &trie, vector<string> &query, int k) {
         }
     }
 
+    for (int i = 0; i < (int) query.size(); ++i) 
+        if (query[i].size() > 8 && query[i].substr(0, 8) == "intitle:") {
+        query[i].erase(query[i].begin(), query[i].begin() + 8);
+        system(("echo " + query[i] + " >> log").c_str());
+        return _Processing(trie, query, k, trie_title, is_intitle = true);
+    }
+
     int index = 0;
     while (index < (int)query.size()) {
         if (query[index] == "AND") {    //  If query contains "AND", delete that term
@@ -127,13 +134,13 @@ vector<int> Operator::_Processing(Trie &trie, vector<string> &query, int k) {
             }
 
             if (temp_char == '~') {   //  The Synonym operator case
-                result = merge(result, _Synonym(trie, query, index, k), k);
+                result = merge(result, _Synonym(!is_intitle ? trie : trie_title, query, index, k), k);
                 query.erase(query.begin() + index);
                 --index;
             }
         }
         ++index;
     }
-    result = merge(result, _And(trie, query, k), k);
+    result = merge(result, _And(!is_intitle ? trie : trie_title, query, k), k);
     return result;
 }
