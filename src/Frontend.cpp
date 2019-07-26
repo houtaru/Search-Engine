@@ -243,12 +243,7 @@ void Frontend::search_scr(Trie &trie, string input_search) {
     draw_rectangle(6, 76, 2, 75);    //  Draw SEARCH_BAR besides the logo
     mvprintw(7, 76+1, input_search.c_str());
 
-    vector<string> query =  String::split(String::to_lower(input_search));
-    for (string & term : query) {
-        if (term[0] == '"' && term.back() == '"' && term.size() >= 2) {
-            term = term.substr(1, (int)term.size() - 2);
-        }
-    }
+    vector<string> query =  String::split(input_search);
     //  Get name of documents
     vector<string> name;
     ifstream fin("TextData2/___index.txt");
@@ -263,6 +258,12 @@ void Frontend::search_scr(Trie &trie, string input_search) {
         result.push_back(name[i]);
     result.push_back("  BACK  ");
 
+
+    for (string & term : query) {
+        if (term[0] == '"' && term.back() == '"' && term.size() >= 2) {
+            term = term.substr(1, (int)term.size() - 2);
+        }
+    }
 
     int current_pointer = -1, size = (int)result.size();
     while (true) {
@@ -533,7 +534,6 @@ void Frontend::loading_scr() {
     Trie trie(256);
     trie.Import();
     if (trie.Loading()) trie.Export();
-    
     clear_scr(LINES/2, LINES - 3);  //  7 is the logo.size()
     refresh();
     main_scr(trie);

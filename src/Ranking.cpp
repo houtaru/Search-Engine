@@ -33,7 +33,7 @@ vector<int> Ranking::FullyAppearance(Trie & trie, vector<string> query) {
 
 
 // Convert all text to a string
-string AllText(int idText) {
+string Ranking::AllText(int idText) {
     vector<string> filename;
     ifstream fin("TextData2/___index.txt");
     string st;
@@ -87,8 +87,13 @@ vector<int> Ranking::output(Trie &trie, vector<string> query, int k) {
                 word = i.first.substr(1, i.first.size() - 2);
                 Aho.Insert(word);            
                 df.clear();
-                for (int idText : FullyAppearance(trie, String::split(String::to_lower(word)))) {
-                    df[idText] = Aho.Value(AllText(idText));
+                for (int idText : FullyAppearance(trie, String::split(word))) {
+                    system(("echo " + std::to_string(idText) + ' ' + std::to_string(0) + " >> log.txt").c_str());
+                    int val = Aho.Value(String::to_lower(AllText(idText)));
+                    if (val) {
+                        //system(("echo " + std::to_string(idText) + ' ' + std::to_string(val) + " >> log.txt").c_str());
+                        df[idText] = val;
+                    }
                 }
                 w_tq = nText;
             }

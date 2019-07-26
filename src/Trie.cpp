@@ -3,8 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <queue>
-
-#include <utils.h>
+#include <Engine/Utils/String.hpp>
 
 Trie::Node::Node() {}
 Trie::Node::Node(int nChild) {
@@ -40,7 +39,8 @@ void Trie::AddText(int idText, std::string text) {
         return;
     }
     UsedText[idText] = 0;
-    std::vector<std::string> words = tokenizer(text);
+    std::vector<std::string> words = String::split(text);
+    
     for (std::string word : words) {
         Insert(word, idText);
     }
@@ -132,9 +132,8 @@ bool Trie::Loading() {
         while (getline(data, st)) {
             for (char c : st) {
                 isChanged = true;
-                if ('A' <= c && c <= 'Z') c += 32;
-                if (('a' <= c && c <= 'z') || ('0' <= c && c <= '9') || c == ' ')
-                text.push_back(c);
+                if (0 <= c && c < 256)
+                    text.push_back(c);
             }
             text.push_back(' '); 
         }
@@ -268,10 +267,11 @@ Aho_Corasick::Node * Aho_Corasick::GetLink(Node * v) {
 int Aho_Corasick::Value(std::string text) {
     Node * p = root;
     int ans = 0;
-    for (char c : text) {
-        p = p -> child[c];
-        if (!p) p = root;
-        ans += p ->cntLeaf;
+    for (char c : text) if (0 <= c && c < nChild) {
+        p = Go(p, c);
+        if (p -> cntLeaf) {
+            ans += p ->cntLeaf;
+        }
     }
     return ans;
 }
@@ -281,13 +281,14 @@ int Aho_Corasick::ValueTrace(std::string text, std::vector<int> &appear, int num
     Node * p = root;
     int id = 0;
     int ans = 0, now = 0, pos = std::min(numchar, (int)text.size());
+    char bef = ' ';
     std::vector<int> disappear(appear.size() + 1, 0);
     // system(("echo " + std::to_string(appear.size()) + " >> log.txt").c_str());
     for (char c : text) if (0 <= c && c < nChild) {
         p = p -> child[c];
         if (!p) p = root;
-        if (p -> cntLeaf) {
-            system(("echo " + to_string(p -> cntLeaf) + ' ' + to_string(id) + ' ' + to_string(p -> depth) + " >> log.txt").c_str());
+        if (p -> cntLeaf && bef == ' ') {
+            //system(("echo " + to_string(p -> cntLeaf) + ' ' + to_string(id) + ' ' + to_string(p -> depth) + " >> log.txt").c_str());
             appear[id - p -> depth + 1]++;
             disappear[id + 1]++;
         }
