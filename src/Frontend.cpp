@@ -246,14 +246,20 @@ void Frontend::search_scr(Operator &OPERATOR, string input_search) {
     mvprintw(7, 76+1, input_search.c_str());
 
     vector<string> query =  String::split(input_search);
+
     //  Get name of documents
     vector<string> name;
+    vector<string> type;
     ifstream fin("TextData2/___index.txt");
     string sub;
-    while (getline(fin, sub))
+    while (getline(fin, sub)) {
         name.push_back(sub);
+        int index = sub.find_last_of('.');
+        type.push_back(sub.substr(index+1, (int)sub.size() - index-1));
+    }
     fin.close();
 
+    Operator OPERATOR(type);
     vector<string> result;
     for (auto i : OPERATOR._Processing(query, 5))
         result.push_back(name[i]);
@@ -533,9 +539,10 @@ void Frontend::loading_scr() {
     refresh();
 
     Trie trie(256);
-    Trie trie_title(256);
-    Operator OPERATOR(trie, trie_title);
-
+    //Trie trie_title(256);
+    //trie_title.Intitle();
+    trie.Import();
+    if (trie.Loading()) trie.Export();
     clear_scr(LINES/2, LINES - 3);  //  7 is the logo.size()
     refresh();
     main_scr(OPERATOR);

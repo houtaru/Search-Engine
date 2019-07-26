@@ -9,28 +9,24 @@
 #include <fstream> 
 #include <Engine/Utils/String.hpp>
 using namespace std;
-struct Operator
-{   
-    // Trie stores 
-
+struct Operator {
+private:
     Ranking ranking;
+    set<int> file_type;
+    set<int> minus, plus;
+    vector<string> type;
 
-    Trie trie;
-    Trie trie_title;
+public:
+    Operator(vector<string> sub);
 
-    Operator::Operator(Trie _trie, Trie _trie_title) {
-        trie = _trie;
-        trie_title = _trie_title;
-    }
-    
     //  AND, $, #, " " Operator 
-    vector<int> _And(Trie& trie, vector<string> &query, int k, set<int> &minus, set<int> &plus);
+    vector<int> _And(Trie &trie, vector<string> &query, int k);
 
     //  OR Operator
     vector<int> _Or(vector<string> &query1, vector<string> &query2, int k );
 
     //  Synonym Operator
-    vector<int> _Synonym(Trie &trie, vector<string> &query, int index, int k, set<int> &minus, set<int> &plus); 
+    vector<int> _Synonym(Trie &trie, vector<string> &query, int index, int k); 
 
     //  Minus or Plus case 
     set<int> _Minus_Plus(Trie &trie, string s, int k);
