@@ -526,13 +526,11 @@ void get_query(string &input_search, int &current_pointer, int x, int y, int wid
     curs_set(0);
 }
 
-
 void reset() {
     for (int i = 0; i < 74; ++i)
         mvaddch(LINES/2, (COLS - 75)/2 + i+1, ' ');
     refresh();
 }
-
 
 void Frontend::main_scr(Trie &trie, Trie& trie_title) {
     MEVENT mouse;
