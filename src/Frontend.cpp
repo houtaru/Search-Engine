@@ -439,6 +439,7 @@ void get_query(string &input_search, int &current_pointer, int x, int y, int wid
         for (int i = 1; i <= suggests.size(); ++i) {
             string temp = input_search.substr(0, input_search.size() - word.size()) + suggests[i - 1];
             if (i == ptr) attron(A_REVERSE);
+            for (int j = (COLS - 75) / 2 + 1; j < (COLS - 75) / 2 + 75; ++j) mvaddch(LINES / 2 + i + 1, j, ' ');
             mvprintw(LINES / 2 + i + 1, y, temp.c_str());
             if (i == ptr) attroff(A_REVERSE);
         }
