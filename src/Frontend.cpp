@@ -246,7 +246,7 @@ void Frontend::search_scr(Trie &trie, string input_search) {
     // for (auto it : query)
     //     cerr << it << endl;
     // exit(0);
-    
+
     //  Get name of documents
     vector<string> name;
     ifstream fin("TextData2/___index.txt");
