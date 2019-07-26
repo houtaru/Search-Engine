@@ -240,10 +240,14 @@ Aho_Corasick::Node * Aho_Corasick::GetLink(Node * v) {
 int Aho_Corasick::Value(std::string text) {
     Node * p = root;
     int ans = 0;
-    for (char c : text) {
+    char bef = ' ';
+    for (char c : text) if (0 <= c && c < nChild) {
         p = p -> child[c];
         if (!p) p = root;
-        ans += p ->cntLeaf;
+        if (p -> cntLeaf && bef == ' ') {
+            ans += p ->cntLeaf;
+        }
+        bef = c;
     }
     return ans;
 }
@@ -253,13 +257,14 @@ int Aho_Corasick::ValueTrace(std::string text, std::vector<int> &appear, int num
     Node * p = root;
     int id = 0;
     int ans = 0, now = 0, pos = std::min(numchar, (int)text.size());
+    char bef = ' ';
     std::vector<int> disappear(appear.size() + 1, 0);
     // system(("echo " + std::to_string(appear.size()) + " >> log.txt").c_str());
     for (char c : text) if (0 <= c && c < nChild) {
         p = p -> child[c];
         if (!p) p = root;
-        if (p -> cntLeaf) {
-            system(("echo " + to_string(p -> cntLeaf) + ' ' + to_string(id) + ' ' + to_string(p -> depth) + " >> log.txt").c_str());
+        if (p -> cntLeaf && bef == ' ') {
+            //system(("echo " + to_string(p -> cntLeaf) + ' ' + to_string(id) + ' ' + to_string(p -> depth) + " >> log.txt").c_str());
             appear[id - p -> depth + 1]++;
             disappear[id + 1]++;
         }
