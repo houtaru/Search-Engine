@@ -54,22 +54,21 @@ void viewDocument(vector<string> query, string name_document) {
     // Pre-calculate #nxt array - the rightmost position that 
     // content[i][k...nxt[i][k] - 1] equal to one of element in #query.
     vector < vector <int> > nxt(content.size());
-    for (int i = 0; i < content.size(); ++i) if (!content[i].empty()) {
+    for (int i = 0; i < content.size(); ++i) {
         nxt[i].resize(content[i].size());
-        for (int k = 0; k < content[i].size(); ++k) {
-            nxt[i][k] = 0;
+        for (int k = 0; k < content[i].size(); ++k) 
             for (auto it : query) if (String::to_lower(content[i].substr(k, it.size())).compare(it) == 0) {
                 nxt[i][k] = max(nxt[i][k], int(it.size() + k));
             }
-        }
     }
 
     // Update content when client press KEY_UP or KEY_DOWN
     auto update = [&](int l, int r) {
         clearScr(16, LINES - 10);
+        r = min(r, int(content.size()));
         for (int i = l; i < r; ++i) {
-            if (content[i].empty()) continue;
-            int pos = 54, b = 1;
+            if (content[i].empty() || int(nxt[i].size()) > 1e5 || int(nxt[i].size()) < 0) continue;
+            int pos = 54;
             for (int k = 0; k < nxt[i].size(); ++k) {
                 if (!nxt[i][k]) mvaddch(15 + (i - l + 1), pos++, content[i][k]);
                 else {
