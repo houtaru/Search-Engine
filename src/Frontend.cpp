@@ -134,7 +134,7 @@ void clear_scr(int x1, int x2) {    //  Clear row x1 to x2
 }
 
 
-void view_document(vector<string> query, string name_document) {
+void view_document(vector<string> query, string name_document, bool is_intitle) {
     clear_scr(12, LINES - 10);
     attron(A_BOLD);
 
@@ -164,13 +164,18 @@ void view_document(vector<string> query, string name_document) {
 
     // Pre-calculate #nxt array - the rightmost position that 
     // content[i][k...nxt[i][k] - 1] equal to one of element in #query.
+    bool is_end_title = false;
     vector < vector <int> > nxt(content.size());
     for (int i = 0; i < content.size(); ++i) {
-        nxt[i].resize(content[i].size());
-        for (int k = 0; k < content[i].size(); ++k) 
+        nxt[i].assign(content[i].size(), 0);
+        for (int k = 0; k < content[i].size(); ++k) {
+            if (std::string("?!.\n").find(content[i][k]) != std::string::npos) is_end_title = true;
+
             for (auto it : query) if (String::to_lower(content[i].substr(k, it.size())).compare(it) == 0) {
                 nxt[i][k] = max(nxt[i][k], int(it.size() + k));
+                if (is_end_title && is_intitle) nxt[i][k] = 0;
             }
+        }
     }
 
     // Update content when client press KEY_UP or KEY_DOWN
@@ -249,7 +254,7 @@ void mouse_search_scr(int &current_pointer, int x, int y, vector<string> result)
 }
 
 
-void Frontend::search_scr(Trie &trie, string input_search) {
+void Frontend::search_scr(Trie &trie, string input_search, Trie& trie_title) {
     clear_scr(3, LINES - 3); 
     MEVENT mouse;
     mousemask(ALL_MOUSE_EVENTS, NULL);
@@ -260,10 +265,10 @@ void Frontend::search_scr(Trie &trie, string input_search) {
 
     vector<string> query =  String::split(input_search);
 
-    
+    bool is_intitle = false;
     Operator OPERATOR(type);
     vector<string> result;
-    for (auto i : OPERATOR._Processing(trie, query, 5))
+    for (auto i : OPERATOR._Processing(trie, query, 5, trie_title, is_intitle))
         result.push_back(name[i]);
     result.push_back("  BACK  ");
 
@@ -318,14 +323,16 @@ void Frontend::search_scr(Trie &trie, string input_search) {
             vector<int> appear(st.size(), 0);
             int r = Aho.ValueTrace(st, appear, numchar) + 1;
             int l = max(0, r - numchar);
+            int cnt = is_intitle ? 1 : 1e5;
             for (int _ = l; _ < r; _ += 70) {
+                bool can_high_light = cnt > 0;
                 for (int j = _; j < min(_ + 70, r); ++j) {
                     string c; c.push_back(st[j]);
-                    if (appear[j]) { attron(A_BOLD); attron(A_REVERSE); }
+                    if (appear[j] && can_high_light) { attron(A_BOLD); attron(A_REVERSE); }
                     mvprintw(14 + (_ - l) / 70 + 5 * i, 75 + (j - _), c.c_str());
-                    if (appear[j]) { attroff(A_BOLD); attroff(A_REVERSE); }
+                    if (appear[j] && can_high_light) { attroff(A_BOLD); attroff(A_REVERSE); }
                 }
-                // break;
+                cnt--;
             }
         }
 
@@ -340,23 +347,23 @@ void Frontend::search_scr(Trie &trie, string input_search) {
                         switch (current_pointer) {
                             case DOCUMENT1:
                                 if (size > 1)
-                                    view_document(query, result[0]);
+                                    view_document(query, result[0], is_intitle);
                                 break;
                             case DOCUMENT2:
                                 if (size > 2)
-                                    view_document(query, result[1]);
+                                    view_document(query, result[1], is_intitle);
                                 break;
                             case DOCUMENT3:
                                 if (size > 3)
-                                    view_document(query, result[2]);
+                                    view_document(query, result[2], is_intitle);
                                 break;
                             case DOCUMENT4:
                                 if (size > 4)
-                                    view_document(query, result[3]);
+                                    view_document(query, result[3], is_intitle);
                                 break;
                             case DOCUMENT5:
                                 if (size > 5)
-                                    view_document(query, result[4]);
+                                    view_document(query, result[4], is_intitle);
                                 break;
                             case BACK:
                                 exit_while = true;
@@ -452,7 +459,7 @@ void reset() {
 }
 
 
-void Frontend::main_scr(Trie &trie) {
+void Frontend::main_scr(Trie &trie, Trie& trie_title) {
     MEVENT mouse;
     mousemask(ALL_MOUSE_EVENTS, NULL);
 
@@ -487,7 +494,7 @@ void Frontend::main_scr(Trie &trie) {
             }
                 goto Loop;
             case SEARCH_BUTTON: {
-                search_scr(trie, input_search);
+                search_scr(trie, input_search, trie_title);
                 current_pointer = SEARCH_BAR;
                 input_search.clear();
                 break;
@@ -541,11 +548,11 @@ void Frontend::loading_scr() {
 
 
     Trie trie(256);
-    //Trie trie_title(256);
-    //trie_title.Intitle();
+    Trie trie_title(256);
+    trie_title.Intitle();
     trie.Import();
     if (trie.Loading()) trie.Export();
     clear_scr(LINES/2, LINES - 3);  //  7 is the logo.size()
     refresh();
-    main_scr(trie);
+    main_scr(trie, trie_title);
 }

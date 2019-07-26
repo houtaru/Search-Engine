@@ -21,9 +21,12 @@ private:
     std::map<int, long long> UsedText;
 public:
     Node * root;
+    Trie();
     Trie(int nChild);
     
     ~Trie();
+
+    void init(int nChild);
     
     bool HasText(int id);
     int NumberOfText();

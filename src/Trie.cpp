@@ -14,12 +14,18 @@ Trie::Node::~Node() {
     for (int i = 0; i < child.size(); ++i) delete child[i];
 }
 
+Trie::Trie() {}
 Trie::Trie(int nChild):nChild(nChild){
     root = new Node(nChild);
 }
 
 Trie::~Trie() {
     delete root;
+}
+
+void Trie::init(int nChild) {
+    this->nChild = nChild;
+    root = new Node(nChild);
 }
 
 bool Trie::HasText(int id) {
@@ -245,10 +251,34 @@ void Trie::Intitle() {
             if ('A' <= c && c <= 'Z') c += 32;
             if (('a' <= c && c <= 'z') || ('0' <= c && c <= '9') || c == ' ') st += c;
         }
-        Insert(st, cnt);
+        AddText(cnt, st);
         ++cnt;
     }
-    Export();
+    
+    // Export
+    std::ofstream fout("Data/TrieIntitle.data");
+    if (!root) {
+        fout << 0 << ' ' << 0 << '\n';
+        return;
+    }
+    std::queue<Node *> q;
+    q.push(root);
+    cnt = 0;
+    while (!q.empty()) {
+        Node * p = q.front();
+        q.pop();
+        if (p -> distribution.size()) ++cnt;
+        std::vector<int> ActiveChild;
+        for (int i = 0; i < p -> child.size(); ++i) if (p -> child[i]) {
+            ActiveChild.push_back(i);
+        }
+        fout << p -> child.size()  << ' ' << ActiveChild.size() << ' ' << p -> distribution.size() << '\n';
+        for (int id : ActiveChild) fout << id << ' '; fout << '\n';
+        for (auto dist : p -> distribution) fout << dist.first << ' ' << dist.second << ' ';
+        fout << '\n'; 
+        for (int i = 0; i < p -> child.size(); ++i) if (p -> child[i]) q.push(p -> child[i]);
+    }
+    fout.close();
 }
 
 Aho_Corasick::Node::Node() {}
