@@ -47,6 +47,7 @@ void Trie::AddText(int idText, std::string text) {
 }
 
 void Trie::Insert(std::string word, int id) {
+    std::cout << word << '\n';
     Node * p = root;
     for (char c : word) {
         if (!p -> child[c]) p -> child[c] = new Node(nChild);
@@ -239,14 +240,11 @@ Aho_Corasick::Node * Aho_Corasick::GetLink(Node * v) {
 int Aho_Corasick::Value(std::string text) {
     Node * p = root;
     int ans = 0;
-    char bef = ' ';
     for (char c : text) if (0 <= c && c < nChild) {
-        p = p -> child[c];
-        if (!p) p = root;
-        if (p -> cntLeaf && bef == ' ') {
+        p = Go(p, c);
+        if (p -> cntLeaf) {
             ans += p ->cntLeaf;
         }
-        bef = c;
     }
     return ans;
 }

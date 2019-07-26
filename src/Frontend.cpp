@@ -253,10 +253,6 @@ void Frontend::search_scr(Trie &trie, string input_search) {
         name.push_back(sub);
     fin.close();
 
-    for (auto x : query) {
-        system(("echo " + x + " >> log.txt").c_str());
-    }
-    
     Ranking ranking;
     vector<string> result;
     for (auto i : ranking.output(trie, query, 5))

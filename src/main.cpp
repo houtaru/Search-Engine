@@ -116,6 +116,7 @@ void viewDocument(vector<string> query, string name_document) {
 }
 
 int main() {
+    
     Frontend frontend;
     frontend.loading_scr();
     // try {
