@@ -11,22 +11,21 @@
 using namespace std;
 struct Operator
 {
-    Ranking ranking ; 
-    //And Operator 
-    vector<int>_And(Trie &trie, vector<string> query,int k);
+    Ranking ranking ;
+    //  AND, $, #, " " Operator 
+    vector<int> _And(Trie &trie, vector<string> &query, int k, set<int> &minus, set<int> &plus);
 
-    //Or Operator
-    vector<int>_Or(Trie &trie, vector<string> query1,vector<string> query2,int k );
+    //  OR Operator
+    vector<int> _Or(Trie &trie, vector<string> &query1, vector<string> &query2, int k );
 
-    //Synonym Operator
-    vector<int>_Synonym(Trie &trie, string s,int k ) ; 
+    //  Synonym Operator
+    vector<int> _Synonym(Trie &trie, vector<string> &query, int index, int k, set<int> &minus, set<int> &plus); 
 
-    //Minus case 
-    vector<int>_Minus(Trie &trie,vector<string> query,int k) ;
+    //  Minus or Plus case 
+    set<int> _Minus_Plus(Trie &trie, string s, int k);
 
-    //" " case
-    vector<int> _FullyAppear(Trie &trie,vector<string> query,int k) ;
- 
+    //  Query processing
+    vector<int> _Processing(Trie &trie, vector<string> &query, int k);
 };
 
 
