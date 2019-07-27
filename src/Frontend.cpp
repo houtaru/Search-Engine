@@ -13,8 +13,6 @@ Frontend::Frontend() {
             type.push_back(sub.substr(index+1));
     }
     fin.close();
-    cerr << name.size() << endl;
-    //exit(0);
 }
 
 enum {
