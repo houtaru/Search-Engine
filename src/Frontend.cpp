@@ -13,8 +13,6 @@ Frontend::Frontend() {
             type.push_back(sub.substr(index+1));
     }
     fin.close();
-    cerr << name.size() << endl;
-    //exit(0);
 }
 
 enum {
@@ -266,6 +264,7 @@ void Frontend::search_scr(Trie &trie, string input_search, Trie& trie_title) {
     draw_rectangle(6, 76, 2, 75);    //  Draw SEARCH_BAR besides the logo
     mvprintw(7, 76+1, input_search.c_str());
 
+    Clock = clock();
     vector<string> query =  String::split(input_search);
 
     bool is_intitle = false;
@@ -274,6 +273,12 @@ void Frontend::search_scr(Trie &trie, string input_search, Trie& trie_title) {
     for (auto i : OPERATOR._Processing(trie, query, 5, trie_title, is_intitle))
         result.push_back(name[i]);
     result.push_back("  BACK  ");
+    Clock = clock() - Clock;
+
+    //  Print the Searching time
+    attron(A_BOLD | COLOR_PAIR(YELLOW));
+    mvprintw(9, 77, "Searching time: %.3f ms", (double)Clock*1000/CLOCKS_PER_SEC);
+    attroff(A_BOLD | COLOR_PAIR(YELLOW));
 
 
     for (string & term : query) {
@@ -396,14 +401,14 @@ void Frontend::search_scr(Trie &trie, string input_search, Trie& trie_title) {
 enum {
     SEARCH_BAR,
     SEARCH_BUTTON,
-    RESET,
+    HISTORY,
     QUIT
 }; 
 
 void mouse_main_scr(int &current_pointer, int x, int y) {
     if (x == LINES/2 + 5 + 4) {
-        if (y >= COLS/2 - 19 && y <= COLS/2 - 8)
-            current_pointer = RESET;
+        if (y >= COLS/2 - 20 && y <= COLS/2 - 8)
+            current_pointer = HISTORY;
         else if (y >= COLS/2 + 8 && y <= COLS/2 + 19)
             current_pointer = QUIT;
     }
@@ -537,10 +542,13 @@ void Frontend::main_scr(Trie &trie, Trie& trie_title) {
     MEVENT mouse;
     mousemask(ALL_MOUSE_EVENTS, NULL);
 
+    attron(A_BOLD | COLOR_PAIR(YELLOW));
+    mvprintw(LINES/2 + 2, (COLS - 75)/2 + 1, "Loading time: %.3f ms", (double)Clock*1000/CLOCKS_PER_SEC);
+    attroff(A_BOLD | COLOR_PAIR(YELLOW));
     vector<string> content{
         "",
         "   SEARCH   ",
-        "   HISTORY  ",
+        "   HISTORY   ",
         "    QUIT    "
     };
     int current_pointer = SEARCH_BAR;
@@ -548,13 +556,13 @@ void Frontend::main_scr(Trie &trie, Trie& trie_title) {
         draw_logo(-4, 0);
         draw_rectangle(LINES/2 - 1, (COLS - 75)/2, 2, 75);  //  Draw SEARCH_BAR
         draw_rectangle(LINES/2 - 1, (COLS + 75 + 5)/2, 2, 13);  //  Draw SEARCH_BUTTON
-        draw_rectangle(LINES/2 + 4 + 4, COLS/2 - 20, 2, 13);    //  Draw RESET
+        draw_rectangle(LINES/2 + 4 + 4, COLS/2 - 21, 2, 14);    //  Draw HISTORY
         draw_rectangle(LINES/2 + 4 + 4, COLS/2 + 7, 2, 13);    //  Draw QUIT
 
         //  Print content for rectangles
         attron(A_BOLD | COLOR_PAIR(CYAN)); //Colors::pairActivate(stdscr, YELLOW);
         mvprintw(LINES/2, (COLS + 75 + 5)/2 + 1, content[SEARCH_BUTTON].c_str());
-        mvprintw(LINES/2 + 5 + 4, COLS/2 - 19, content[RESET].c_str());
+        mvprintw(LINES/2 + 5 + 4, COLS/2 - 20, content[HISTORY].c_str());
         mvprintw(LINES/2 + 5 + 4, COLS/2 + 8, content[QUIT].c_str());
         attroff(A_BOLD | COLOR_PAIR(CYAN)); //Colors::pairDeactivate(stdscr, YELLOW);
         refresh();
@@ -566,14 +574,14 @@ void Frontend::main_scr(Trie &trie, Trie& trie_title) {
             case SEARCH_BAR: {
                 get_query(input_search, current_pointer, LINES/2, (COLS-75)/2 + 1, 74, trie);
             }
-                goto Loop;
+            goto Loop;
             case SEARCH_BUTTON: {
                 search_scr(trie, input_search, trie_title);
                 current_pointer = SEARCH_BAR;
                 input_search.clear();
                 break;
             }
-            case RESET: {
+            case HISTORY: {
                 reset();
                 current_pointer = SEARCH_BAR;
                 input_search.clear();
@@ -623,12 +631,13 @@ void Frontend::loading_scr() {
     attroff(A_BLINK | A_BOLD | COLOR_PAIR(MAGENTA));
     refresh();
 
-
+    Clock = clock();
     Trie trie(256);
     Trie trie_title(256);
     trie_title.Intitle();
     trie.Import();
     if (trie.Loading()) trie.Export();
+    Clock = clock() - Clock;
     clear_scr(LINES/2, LINES - 3);  //  7 is the logo.size()
     refresh();
     main_scr(trie, trie_title);

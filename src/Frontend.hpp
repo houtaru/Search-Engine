@@ -12,7 +12,7 @@ using namespace std;
 
 struct Frontend {
 private:
-    
+    clock_t Clock;
     vector<string> name;
     vector<string> type;
 
