@@ -62,3 +62,8 @@ std::string String::to_lower(std::string str) {
     boost::algorithm::to_lower(str);
     return str;
 }
+
+
+bool String::isAlNum(char c) {
+    return ('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z') || ('0' <= c && c <= '9');
+}

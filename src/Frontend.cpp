@@ -162,6 +162,21 @@ void view_document(vector<string> query, string name_document, bool is_intitle) 
 
     // Pre-calculate #nxt array - the rightmost position that 
     // content[i][k...nxt[i][k] - 1] equal to one of element in #query.
+    // bool is_end_title = false;
+    // vector < vector <int> > nxt(content.size());
+    // for (int i = 0; i < content.size(); ++i) {
+    //     nxt[i].assign(content[i].size(), 0);
+    //     for (int k = 0; k < content[i].size(); ++k) {
+    //         if (std::string("?!.\n").find(content[i][k]) != std::string::npos) is_end_title = true;
+
+    //         for (auto it : query) if (String::to_lower(content[i].substr(k, it.size())) == it) {
+    //             nxt[i][k] = max(nxt[i][k], int(it.size() + k));
+    //             if (is_end_title && is_intitle) nxt[i][k] = 0;
+    //             if ((k > 0 && std::string(".,!?").find(content[i][k - 1]) == std::string::npos)) nxt[i][k] = 0;
+    //             if (k + it.size() < content[i].size() && std::string("!.,? ").find(content[i][k + it.size()]) == std::string::npos) nxt[i][k] = 0;
+    //         }
+    //     }
+    // }
     bool is_end_title = false;
     vector < vector <int> > nxt(content.size());
     for (int i = 0; i < content.size(); ++i) {
@@ -169,15 +184,12 @@ void view_document(vector<string> query, string name_document, bool is_intitle) 
         for (int k = 0; k < content[i].size(); ++k) {
             if (std::string("?!.\n").find(content[i][k]) != std::string::npos) is_end_title = true;
 
-            for (auto it : query) if (String::to_lower(content[i].substr(k, it.size())) == it) {
+            for (auto it : query) if (String::to_lower(content[i].substr(k, it.size())).compare(it) == 0) {
                 nxt[i][k] = max(nxt[i][k], int(it.size() + k));
                 if (is_end_title && is_intitle) nxt[i][k] = 0;
-                if ((k > 0 && std::string(".,!?").find(content[i][k - 1]) == std::string::npos)) nxt[i][k] = 0;
-                if (k + it.size() < content[i].size() && std::string("!.,? ").find(content[i][k + it.size()]) == std::string::npos) nxt[i][k] = 0;
             }
         }
     }
-
     // Update content when client press KEY_UP or KEY_DOWN
     auto update = [&](int l, int r) {
         r = min(r, (int) content.size());
@@ -189,6 +201,11 @@ void view_document(vector<string> query, string name_document, bool is_intitle) 
             for (int k = 0; k < nxt[i].size(); ++k) {
                 if (!nxt[i][k]) mvaddch(15 + (i - l + 1), pos++, content[i][k]);
                 else {
+                    if (k && String::isAlNum(content[i][k - 1]) 
+                    || (nxt[i][k] < content[i].size() && String::isAlNum(content[i][nxt[i][k]]))) {
+                        mvaddch(15 + (i - l + 1), pos++, content[i][k]);
+                        continue;
+                    }
                     int sz = nxt[i][k] - k;
                     attron(A_BOLD | A_REVERSE);
                     mvaddstr(15 + (i - l + 1), pos, content[i].substr(k, sz).c_str());
@@ -316,7 +333,6 @@ void Frontend::search_scr(Trie &trie, string input_search, Trie& trie_title) {
           // Show some thing
         Aho_Corasick Aho(256);
         for (auto x : query) {
-     //       system(("echo " + x + " >> log.txt").c_str());
             Aho.Insert(x);
         }
         for (int i = 0; i < size - 1; ++i) {
@@ -325,7 +341,6 @@ void Frontend::search_scr(Trie &trie, string input_search, Trie& trie_title) {
             string st, temp;
             while (data >> temp) {
                 for (char c : temp) if (0 <= c && c < 256) {
-                    if ('A' <= c && c <= 'Z') c += 32;
                     st.push_back(c);
                 }
                 st.push_back(' ');

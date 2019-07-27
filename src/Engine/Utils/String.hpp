@@ -55,6 +55,8 @@ namespace String {
     std::vector < std::string > split(const std::string& str, char delim = ' ', bool flag = false);
 
     std::string to_lower(std::string str);
+
+    bool isAlNum(char c);
 }
 
 #endif

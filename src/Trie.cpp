@@ -286,7 +286,7 @@ void Trie::Intitle() {
 }
 
 Aho_Corasick::Node::Node() {}
-Aho_Corasick::Node::Node(int nChild, Node * par, int par_id): par(par), par_id(par_id) {
+Aho_Corasick::Node::Node(int nChild, Node * par, int par_id): par(par), par_id(par_id), link(nullptr) {
     child.resize(nChild, nullptr);
     go.resize(nChild, nullptr);
     cntLeaf = 0;
@@ -330,10 +330,19 @@ Aho_Corasick::Node * Aho_Corasick::GetLink(Node * v) {
 int Aho_Corasick::Value(std::string text) {
     Node * p = root;
     int ans = 0;
+    std::string st;
     for (char c : text) if (0 <= c && c < nChild) {
-        p = Go(p, c);
+        if ('A' <= c && c <= 'Z') c += 32;
+        st.push_back(c);
+    }
+    for (int i = 0; i < st.size(); ++i) {
+        char c = st[i];
+        p = p -> child[c];
+        if (!p) p = root;
         if (p -> cntLeaf) {
-            ans += p ->cntLeaf;
+            if (i >= p -> depth && String::isAlNum(st[i - p -> depth])) continue; 
+            if (i + 1 < st.size() && String::isAlNum(st[i + 1])) continue; 
+            ans += p -> cntLeaf;
         }
     }
     return ans;
@@ -342,29 +351,32 @@ using namespace std;
 
 int Aho_Corasick::ValueTrace(std::string text, std::vector<int> &appear, int numchar) {
     Node * p = root;
-    int id = 0;
     int ans = 0, now = 0, pos = std::min(numchar, (int)text.size());
-    char bef = ' ';
     std::vector<int> disappear(appear.size() + 1, 0);
-    // system(("echo " + std::to_string(appear.size()) + " >> log.txt").c_str());
+    std::string st;
     for (char c : text) if (0 <= c && c < nChild) {
+        if ('A' <= c && c <= 'Z') c += 32;
+        st.push_back(c);
+    }
+    for (int i = 0; i < st.size(); ++i) {
+        char c = st[i];
         p = p -> child[c];
         if (!p) p = root;
-        if (p -> cntLeaf && bef == ' ') {
-            //system(("echo " + to_string(p -> cntLeaf) + ' ' + to_string(id) + ' ' + to_string(p -> depth) + " >> log.txt").c_str());
-            appear[id - p -> depth + 1]++;
-            disappear[id + 1]++;
+        if (p -> cntLeaf) {
+            if (i >= p -> depth && String::isAlNum(st[i - p -> depth])) continue; 
+            if (i + 1 < st.size() && String::isAlNum(st[i + 1])) continue; 
+            appear[i - p -> depth + 1]++;
+            disappear[i + 1]++;
         }
         now += p -> cntLeaf;
-        if (id >= numchar) now -= appear[id - numchar];
+        if (i >= numchar) now -= appear[i - numchar];
         if (ans <= now) {
             ans = now;
-            pos = id;
+            pos = i;
         }
-        ++id;
     }
     if (appear.size()) appear[0] -= disappear[0];
-    for (int i = 1; i < id; ++i) appear[i] += appear[i - 1] - disappear[i];
+    for (int i = 1; i < st.size(); ++i) appear[i] += appear[i - 1] - disappear[i];
     return pos;
 }
 
