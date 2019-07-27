@@ -18,11 +18,11 @@ private:
 
 public:
     Frontend();
-    void draw_rectangle(int x1, int y1, int x2, int y2);
+    //void draw_rectangle(int x1, int y1, int x2, int y2, bool is_bold = true);
     void draw_logo(int x1, int x2);
     
-    void search_scr(Trie &trie, string input_search);
-    void main_scr(Trie &trie);
+    void search_scr(Trie &trie, string input_search, Trie& trie_title);
+    void main_scr(Trie &trie, Trie& trie_title);
     void loading_scr();
 };
 

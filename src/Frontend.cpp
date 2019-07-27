@@ -26,8 +26,8 @@ enum {
     WHITE
 };
 
-void Frontend::draw_rectangle(int x1, int y1, int height, int width) {
-    attron(A_BOLD);
+void draw_rectangle(int x1, int y1, int height, int width, bool is_bold = true) {
+    if (is_bold) attron(A_BOLD);
     int x2 = x1 + height, y2 = y1 + width;
     for (int i = x1; i <= x2; ++i) {
         mvaddch(i, y1, ACS_VLINE);
@@ -43,7 +43,7 @@ void Frontend::draw_rectangle(int x1, int y1, int height, int width) {
     mvaddch(x2, y1, ACS_LLCORNER);
     mvaddch(x2, y2, ACS_LRCORNER);
     refresh();
-    attroff(A_BOLD);
+    if (is_bold) attroff(A_BOLD);
 }
 
 
@@ -132,7 +132,7 @@ void clear_scr(int x1, int x2) {    //  Clear row x1 to x2
 }
 
 
-void view_document(vector<string> query, string name_document) {
+void view_document(vector<string> query, string name_document, bool is_intitle) {
     clear_scr(12, LINES - 10);
     attron(A_BOLD);
 
@@ -162,13 +162,18 @@ void view_document(vector<string> query, string name_document) {
 
     // Pre-calculate #nxt array - the rightmost position that 
     // content[i][k...nxt[i][k] - 1] equal to one of element in #query.
+    bool is_end_title = false;
     vector < vector <int> > nxt(content.size());
     for (int i = 0; i < content.size(); ++i) {
-        nxt[i].resize(content[i].size());
-        for (int k = 0; k < content[i].size(); ++k) 
+        nxt[i].assign(content[i].size(), 0);
+        for (int k = 0; k < content[i].size(); ++k) {
+            if (std::string("?!.\n").find(content[i][k]) != std::string::npos) is_end_title = true;
+
             for (auto it : query) if (String::to_lower(content[i].substr(k, it.size())).compare(it) == 0) {
                 nxt[i][k] = max(nxt[i][k], int(it.size() + k));
+                if (is_end_title && is_intitle) nxt[i][k] = 0;
             }
+        }
     }
 
     // Update content when client press KEY_UP or KEY_DOWN
@@ -247,7 +252,10 @@ void mouse_search_scr(int &current_pointer, int x, int y, vector<string> result)
 }
 
 
-void Frontend::search_scr(Trie &trie, string input_search) {
+void Frontend::search_scr(Trie &trie, string input_search, Trie& trie_title) {
+    //Add queries to history
+    system(("echo " + input_search + " >> Data/history.data").c_str());
+    
     clear_scr(3, LINES - 3); 
     MEVENT mouse;
     mousemask(ALL_MOUSE_EVENTS, NULL);
@@ -258,10 +266,10 @@ void Frontend::search_scr(Trie &trie, string input_search) {
 
     vector<string> query =  String::split(input_search);
 
-    
+    bool is_intitle = false;
     Operator OPERATOR(type);
     vector<string> result;
-    for (auto i : OPERATOR._Processing(trie, query, 5))
+    for (auto i : OPERATOR._Processing(trie, query, 5, trie_title, is_intitle))
         result.push_back(name[i]);
     result.push_back("  BACK  ");
 
@@ -316,14 +324,16 @@ void Frontend::search_scr(Trie &trie, string input_search) {
             vector<int> appear(st.size(), 0);
             int r = Aho.ValueTrace(st, appear, numchar) + 1;
             int l = max(0, r - numchar);
+            int cnt = is_intitle ? 1 : 1e5;
             for (int _ = l; _ < r; _ += 70) {
+                bool can_high_light = cnt > 0;
                 for (int j = _; j < min(_ + 70, r); ++j) {
                     string c; c.push_back(st[j]);
-                    if (appear[j]) { attron(A_BOLD); attron(A_REVERSE); }
+                    if (appear[j] && can_high_light) { attron(A_BOLD); attron(A_REVERSE); }
                     mvprintw(14 + (_ - l) / 70 + 5 * i, 75 + (j - _), c.c_str());
-                    if (appear[j]) { attroff(A_BOLD); attroff(A_REVERSE); }
+                    if (appear[j] && can_high_light) { attroff(A_BOLD); attroff(A_REVERSE); }
                 }
-                // break;
+                cnt--;
             }
         }
 
@@ -338,23 +348,23 @@ void Frontend::search_scr(Trie &trie, string input_search) {
                         switch (current_pointer) {
                             case DOCUMENT1:
                                 if (size > 1)
-                                    view_document(query, result[0]);
+                                    view_document(query, result[0], is_intitle);
                                 break;
                             case DOCUMENT2:
                                 if (size > 2)
-                                    view_document(query, result[1]);
+                                    view_document(query, result[1], is_intitle);
                                 break;
                             case DOCUMENT3:
                                 if (size > 3)
-                                    view_document(query, result[2]);
+                                    view_document(query, result[2], is_intitle);
                                 break;
                             case DOCUMENT4:
                                 if (size > 4)
-                                    view_document(query, result[3]);
+                                    view_document(query, result[3], is_intitle);
                                 break;
                             case DOCUMENT5:
                                 if (size > 5)
-                                    view_document(query, result[4]);
+                                    view_document(query, result[4], is_intitle);
                                 break;
                             case BACK:
                                 exit_while = true;
@@ -389,7 +399,7 @@ enum {
 }; 
 
 void mouse_main_scr(int &current_pointer, int x, int y) {
-    if (x == LINES/2 + 5) {
+    if (x == LINES/2 + 5 + 4) {
         if (y >= COLS/2 - 19 && y <= COLS/2 - 8)
             current_pointer = RESET;
         else if (y >= COLS/2 + 8 && y <= COLS/2 + 19)
@@ -404,16 +414,63 @@ void mouse_main_scr(int &current_pointer, int x, int y) {
 }
 
 
-void get_query(string &input_search, int &current_pointer, int x, int y, int width) {
+void get_query(string &input_search, int &current_pointer, int x, int y, int width, Trie& trie) {
     move(x, y);   //  Set the cursor to be in the Search rectangle
     curs_set(1);    //  Set cursor visible
+    keypad(stdscr, true);
 
+    string word, pre_word;
+    std::vector < std::string > suggests;
+    
     MEVENT mouse;
     mousemask(ALL_MOUSE_EVENTS, NULL);
-    int a = x, b = y;
+    int a = x, b = y, ptr = 0, lim = 6;
+    bool can_suggest = false;
+
+    auto updateSuggest = [&] (int ptr) {
+        // clear auto suggest screen
+        for (int i = LINES / 2 + 2; i <= LINES / 2 + 2 + 4; ++i)
+            for (int j = (COLS - 75) / 2 + 1; j < (COLS - 75) / 2 + 75; ++j)
+                mvaddch(i, j, ' ');
+
+        curs_set(0);
+        for (int i = 1; i <= suggests.size(); ++i) {
+            string temp = input_search.substr(0, input_search.size() - word.size()) + suggests[i - 1];
+            if (i == ptr) attron(A_REVERSE);
+            for (int j = (COLS - 75) / 2 + 1; j < (COLS - 75) / 2 + 75; ++j) mvaddch(LINES / 2 + i + 1, j, ' ');
+            mvprintw(LINES / 2 + i + 1, y, temp.c_str());
+            if (i == ptr) attroff(A_REVERSE);
+        }
+        refresh();
+        move(a, b);
+        curs_set(1);
+    };
+    
     while (true) {
+        //Display auto suggestion
+        if (!word.empty() && word != pre_word) {
+            system(("echo " + pre_word + " " + word + " >> log").c_str());
+            
+            suggests = trie.auto_suggestion(word, lim - 1);
+            if (suggests[0].compare("null") != 0) {
+                ptr = 0;
+                lim = suggests.size() + 1;
+                can_suggest = true;
+                
+                curs_set(0);
+                draw_rectangle(LINES/2 + 1, (COLS - 75)/2, 6, 75, false);
+                updateSuggest(ptr);
+
+            } else can_suggest = false;
+            curs_set(1);
+            pre_word = word;
+        }
+
         int temp = getch();
         if (temp == '\n') {
+            if (ptr != 0) {
+                input_search = input_search.substr(0, input_search.size() - word.size()) + suggests[ptr - 1];
+            }
             current_pointer = SEARCH_BUTTON;
             break;
         }
@@ -428,20 +485,45 @@ void get_query(string &input_search, int &current_pointer, int x, int y, int wid
                 }
             }
         }
+        if (temp == KEY_UP) {
+            ptr = (ptr - 1 + lim) % lim;
+            if (can_suggest) {
+                updateSuggest(ptr);
+            }
+        } else if (temp == KEY_DOWN) {
+            ptr = (ptr + 1) % lim;
+            if (can_suggest) updateSuggest(ptr);
+        }
         if ((temp == 127 || temp == 263) && b > y) {   //  If user press BACKSPACE
+            // clear auto suggest screen
+            
+            for (int i = LINES / 2 + 2; i <= LINES / 2 + 2 + 4; ++i)
+                for (int j = (COLS - 75) / 2 + 1; j < (COLS - 75) / 2 + 75; ++j)
+                    mvaddch(i, j, ' ');
+            
             mvaddch(a, --b, ' ');
             if (!input_search.empty())
                 input_search.pop_back();
+            if (!word.empty()) word.pop_back();
+            else {
+                int x = input_search.find_last_of(' ');
+                if (x != string::npos) word = input_search.substr(x + 1);
+                else if (input_search.size()) word = input_search;
+            }
             move(a, b);
         } else if (temp >= 32 && temp <= 126 && b < y + 75) {    //  User have to input a query with length < 75
+            ptr = 0;
             input_search.push_back((char)temp);
+            if (temp == ' ') {
+                word.clear();
+            } else {
+                word += char(temp);
+            }
             mvaddch(a, b++, temp);
         }
     }
-
     curs_set(0);
 }
-
 
 void reset() {
     for (int i = 0; i < 74; ++i)
@@ -449,15 +531,14 @@ void reset() {
     refresh();
 }
 
-
-void Frontend::main_scr(Trie &trie) {
+void Frontend::main_scr(Trie &trie, Trie& trie_title) {
     MEVENT mouse;
     mousemask(ALL_MOUSE_EVENTS, NULL);
 
     vector<string> content{
         "",
         "   SEARCH   ",
-        "   RESET    ",
+        "   HISTORY  ",
         "    QUIT    "
     };
     int current_pointer = SEARCH_BAR;
@@ -465,14 +546,14 @@ void Frontend::main_scr(Trie &trie) {
         draw_logo(-4, 0);
         draw_rectangle(LINES/2 - 1, (COLS - 75)/2, 2, 75);  //  Draw SEARCH_BAR
         draw_rectangle(LINES/2 - 1, (COLS + 75 + 5)/2, 2, 13);  //  Draw SEARCH_BUTTON
-        draw_rectangle(LINES/2 + 4, COLS/2 - 20, 2, 13);    //  Draw RESET
-        draw_rectangle(LINES/2 + 4, COLS/2 + 7, 2, 13);    //  Draw QUIT
+        draw_rectangle(LINES/2 + 4 + 4, COLS/2 - 20, 2, 13);    //  Draw RESET
+        draw_rectangle(LINES/2 + 4 + 4, COLS/2 + 7, 2, 13);    //  Draw QUIT
 
         //  Print content for rectangles
         attron(A_BOLD | COLOR_PAIR(CYAN)); //Colors::pairActivate(stdscr, YELLOW);
         mvprintw(LINES/2, (COLS + 75 + 5)/2 + 1, content[SEARCH_BUTTON].c_str());
-        mvprintw(LINES/2 + 5, COLS/2 - 19, content[RESET].c_str());
-        mvprintw(LINES/2 + 5, COLS/2 + 8, content[QUIT].c_str());
+        mvprintw(LINES/2 + 5 + 4, COLS/2 - 19, content[RESET].c_str());
+        mvprintw(LINES/2 + 5 + 4, COLS/2 + 8, content[QUIT].c_str());
         attroff(A_BOLD | COLOR_PAIR(CYAN)); //Colors::pairDeactivate(stdscr, YELLOW);
         refresh();
 
@@ -481,11 +562,11 @@ void Frontend::main_scr(Trie &trie) {
         string input_search; 
         Loop:switch (current_pointer) {
             case SEARCH_BAR: {
-                get_query(input_search, current_pointer, LINES/2, (COLS-75)/2 + 1, 74);
+                get_query(input_search, current_pointer, LINES/2, (COLS-75)/2 + 1, 74, trie);
             }
                 goto Loop;
             case SEARCH_BUTTON: {
-                search_scr(trie, input_search);
+                search_scr(trie, input_search, trie_title);
                 current_pointer = SEARCH_BAR;
                 input_search.clear();
                 break;
@@ -512,6 +593,9 @@ void Frontend::main_scr(Trie &trie) {
 
 
 void Frontend::loading_scr() {
+    //Clear old history data
+    system("rm -f Data/history.data");
+
     //  Initializing for ncurses
     initscr();
     noecho();
@@ -539,11 +623,11 @@ void Frontend::loading_scr() {
 
 
     Trie trie(256);
-    //Trie trie_title(256);
-    //trie_title.Intitle();
+    Trie trie_title(256);
+    trie_title.Intitle();
     trie.Import();
     if (trie.Loading()) trie.Export();
     clear_scr(LINES/2, LINES - 3);  //  7 is the logo.size()
     refresh();
-    main_scr(trie);
+    main_scr(trie, trie_title);
 }
