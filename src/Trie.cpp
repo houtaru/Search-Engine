@@ -177,6 +177,7 @@ void Trie::Export() {
 }
 
 std::vector < std::string > Trie::auto_suggestion(std::string text, int lim) {
+    if (text[0] == '\"') return {"null"};
     Node * p = root;
     for (int w : text) {
         if (p->child[w] == NULL) return {"null"};

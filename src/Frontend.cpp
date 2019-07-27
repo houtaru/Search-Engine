@@ -169,9 +169,11 @@ void view_document(vector<string> query, string name_document, bool is_intitle) 
         for (int k = 0; k < content[i].size(); ++k) {
             if (std::string("?!.\n").find(content[i][k]) != std::string::npos) is_end_title = true;
 
-            for (auto it : query) if (String::to_lower(content[i].substr(k, it.size())).compare(it) == 0) {
+            for (auto it : query) if (String::to_lower(content[i].substr(k, it.size())) == it) {
                 nxt[i][k] = max(nxt[i][k], int(it.size() + k));
                 if (is_end_title && is_intitle) nxt[i][k] = 0;
+                if ((k > 0 && std::string(".,!?").find(content[i][k - 1]) == std::string::npos)) nxt[i][k] = 0;
+                if (k + it.size() < content[i].size() && std::string("!.,? ").find(content[i][k + it.size()]) == std::string::npos) nxt[i][k] = 0;
             }
         }
     }
@@ -454,10 +456,9 @@ void get_query(string &input_search, int &current_pointer, int x, int y, int wid
     };
     
     while (true) {
-        //Display auto suggestion
+        //Display auto suggestion 
         if (!word.empty() && word != pre_word) {
             system(("echo " + pre_word + " " + word + " >> log").c_str());
-            
             suggests = trie.auto_suggestion(word, lim - 1);
             if (suggests[0].compare("null") != 0) {
                 ptr = 0;
@@ -494,36 +495,35 @@ void get_query(string &input_search, int &current_pointer, int x, int y, int wid
         }
         if (temp == KEY_UP) {
             ptr = (ptr - 1 + lim) % lim;
-            if (can_suggest) {
-                updateSuggest(ptr);
-            }
+            if (can_suggest) updateSuggest(ptr);
         } else if (temp == KEY_DOWN) {
             ptr = (ptr + 1) % lim;
             if (can_suggest) updateSuggest(ptr);
         }
         if ((temp == 127 || temp == 263) && b > y) {   //  If user press BACKSPACE
             // clear auto suggest screen
-            
             for (int i = LINES / 2 + 2; i <= LINES / 2 + 2 + 4; ++i)
                 for (int j = (COLS - 75) / 2 + 1; j < (COLS - 75) / 2 + 75; ++j)
                     mvaddch(i, j, ' ');
             
             mvaddch(a, --b, ' ');
-            if (!input_search.empty())
-                input_search.pop_back();
+            if (!input_search.empty()) input_search.pop_back();
             if (!word.empty()) word.pop_back();
             else {
                 int x = input_search.find_last_of(' ');
                 if (x != string::npos) word = input_search.substr(x + 1);
-                else if (input_search.size()) word = input_search;
+                else if (input_search.size()) {
+                    word = input_search;
+                    if (!word.empty() && word[0] != '#') word.erase(word.begin());
+                }
             }
             move(a, b);
-        } else if (temp >= 32 && temp <= 126 && b < y + 75) {    //  User have to input a query with length < 75
+        } else if ((temp >= 32 && temp <= 126) && b < y + 75) {    //  User have to input a query with length < 75
             ptr = 0;
             input_search.push_back((char)temp);
             if (temp == ' ') {
                 word.clear();
-            } else {
+            } else if (temp != '#' && temp != '\"') {
                 word += char(temp);
             }
             mvaddch(a, b++, temp);
