@@ -635,6 +635,8 @@ void Frontend::loading_scr() {
     Trie trie(256);
     Trie trie_title(256);
     trie_title.Intitle();
+    Clock = clock() - Clock;
+    system(("echo " + String::toString(int(Clock * 100000)) + " >> log").c_str());
     trie.Import();
     if (trie.Loading()) trie.Export();
     Clock = clock() - Clock;

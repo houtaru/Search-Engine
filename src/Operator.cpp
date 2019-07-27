@@ -77,7 +77,7 @@ vector<int> Operator::_Processing(Trie &trie, vector<string> &query, int k, Trie
         }
     }
 
-    int count = 0, index_type = 0;
+    int count = 0, index_type = 0;  //  Handle the filetype case
     for (int i = 0; i < (int)query.size(); ++i) {
         if (query[i].substr(0, 9) == "filetype:") {
             ++count;
@@ -94,22 +94,26 @@ vector<int> Operator::_Processing(Trie &trie, vector<string> &query, int k, Trie
             }
         }
         query.erase(query.begin()+index_type);
-        if (query.empty()) {
+        if (query.empty()) {    //  If query contains only filetype:TYPE
             auto it = plus.begin();
-            for (int i = 0; i < min(5, (int)plus.size()); ++i) {
+            for (int i = 0; i < min(k, (int)plus.size()); ++i) {
                 result.push_back(*it);
                 ++it;
             }
             return result;
         }
     }
-
+    
+    bool check_title = false;   //  Handle the intitle case
     for (int i = 0; i < (int) query.size(); ++i) 
         if (query[i].size() > 8 && query[i].substr(0, 8) == "intitle:") {
         query[i].erase(query[i].begin(), query[i].begin() + 8);
         system(("echo " + query[i] + " >> log").c_str());
-        return _Processing(trie, query, k, trie_title, is_intitle = true);
+        check_title = true;
     }
+
+    if (check_title)    
+        return _Processing(trie, query, k, trie_title, is_intitle = true);
 
     int index = 0;
     while (index < (int)query.size()) {

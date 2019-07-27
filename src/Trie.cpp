@@ -202,9 +202,10 @@ std::vector < std::string > Trie::auto_suggestion(std::string text, int lim) {
 
 void Trie::Intitle() {
     // Check if TrieIntitle exist or not
+    // Import
     std::ifstream fin("Data/TrieIntitle.data");
     if (fin.is_open()) {
-         std::queue<Node *> q;
+        std::queue<Node *> q;
         q.push(root);
         int cnt = 0;
         while (!q.empty()) {
@@ -234,6 +235,7 @@ void Trie::Intitle() {
     }
     fin.close();
 
+    // Loading
     fin.open("TextData2/___index.txt");
     std::string filename;
     int cnt = 0;
@@ -248,7 +250,8 @@ void Trie::Intitle() {
         std::string text;
 
         char c;
-        while (std::string("?!.\n").find(c = data.get()) == std::string::npos) {
+        while (data.get(c)) {
+            if (std::string("?!.\n").find(c) != std::string::npos) break;
             if ('A' <= c && c <= 'Z') c += 32;
             if (('a' <= c && c <= 'z') || ('0' <= c && c <= '9') || c == ' ') st += c;
         }
