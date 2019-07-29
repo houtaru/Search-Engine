@@ -4,7 +4,6 @@
 #include <bits/stdc++.h>
 #include <ncurses.h>
 #include <Ranking.hpp>
-#include <Engine/Graphics/Colors.hpp>
 #include <Operator.hpp>
 #include <Trie.hpp>
 
