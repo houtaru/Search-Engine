@@ -3,9 +3,14 @@
 Operator::Operator(vector<string> sub) { type = sub; }
 
 //  Merge 2 results into a single result
-vector<int> merge(vector<int> result1, vector<int> result2, int k) {
+vector<di> merge(vector<di> result1, vector<di> result2, int k) {
     result1.insert(result1.end(),result2.begin(),result2.end()) ; 
-    sort(result1.begin(),result1.end(),greater<int>()) ; 
+    sort(result1.begin(),result1.end(),[&](di x, di y){
+        if (x.first - y.first > 0.00001)
+            return true;
+        else 
+            return false;
+    }) ; 
     int _min =  min(k,(int) result1.size())  ; 
     result1.resize(_min) ; 
     return result1 ;
@@ -13,25 +18,25 @@ vector<int> merge(vector<int> result1, vector<int> result2, int k) {
 
 
 //  AND, $, #, " " operator
-vector<int> Operator::_And(Trie &trie, vector<string> &query, int k){
+vector<di> Operator::_And(Trie &trie, vector<string> &query, int k){
     return ranking.output(trie, query, k, minus, plus) ;
 }
 
 
 //  List of documents when combining query1 OR query 2
-vector<int> Operator::_Or(Trie &trie, vector<string> &query1, vector<string> &query2, int k, Trie& trie_title, bool& is_intitle) {
-    vector<int> result1= _Processing(trie,query1,k, trie_title, is_intitle) ;
-    vector<int> result2 = _Processing(trie,query2,k, trie_title, is_intitle) ;
+vector<di> Operator::_Or(Trie &trie, vector<string> &query1, vector<string> &query2, int k, Trie& trie_title, bool& is_intitle) {
+    vector<di> result1= _Processing(trie,query1,k, trie_title, is_intitle) ;
+    vector<di> result2 = _Processing(trie,query2,k, trie_title, is_intitle) ;
     return merge(result1, result2, k);
 }
 
 
 //  List of documents of synonym of string s
-vector<int> Operator:: _Synonym(Trie &trie, vector<string> &query, int index, int k) {
+vector<di> Operator:: _Synonym(Trie &trie, vector<string> &query, int index, int k) {
     ifstream fin ; 
     string temp ; 
     vector <string> synonym ; 
-    vector <int> result ; 
+    vector <di> result ; 
     fin.open(("Synonym_data/"+query[index]).c_str());
     //if string s doesn't have synonym, return vector 0 
     if (!fin.is_open())
@@ -44,7 +49,7 @@ vector<int> Operator:: _Synonym(Trie &trie, vector<string> &query, int index, in
         {
             vector<string> tempo;
             tempo.push_back(i) ; 
-            vector<int>result1 = ranking.output(trie,tempo,k,minus,plus) ; 
+            vector<di>result1 = ranking.output(trie,tempo,k,minus,plus) ; 
             if (!result1.empty())
                 query.insert(query.begin()+index+1, i);
             result = merge(result, result1, k);
@@ -64,8 +69,40 @@ set<int> Operator::_Minus_Plus(Trie &trie, string s, int k ) {
 }
 
 
-vector<int> Operator::_Processing(Trie &trie, vector<string> &query, int k, Trie& trie_title, bool& is_intitle) {
-    vector<int> result;
+//  Range case
+void Operator::_Range(vector<string> &query) {
+    bool check = false;
+    int i, j;
+    for (i = 0 ; i < (int)query.size(); ++i) {
+        for (j = 0; j < query[i].length()-1; j++)
+            if (query[i][j] == '.' && query[i][j+1] == '.') {
+                check = true;
+                break;
+            }
+        if (check)
+            break;
+    }
+    if (check) {
+        query.erase(query.begin() + i);
+        string s1, s2;
+        s1 = query[i].substr(0, j);
+        s2 = query[i].substr(j + 2, query[i].length() - 2 - j);
+        bool check_dollar = false;
+        if (s1[0] == '$') {
+            s1.erase(s1.begin());
+            s2.erase(s2.begin());
+            check_dollar = true;
+        }
+        int first = stoi(s1), second = stoi(s2);
+        for (int i = first; i <= second; ++i) {
+            query.push_back((check_dollar ? "$" : "") + to_string(i));
+        }
+    }
+}
+
+
+vector<di> Operator::_Processing(Trie &trie, vector<string> &query, int k, Trie& trie_title, bool& is_intitle) {
+    vector<di> result;
 
     for (int i = 0; i < (int)query.size(); ++i) {
         if (query[i] == "OR") { //  If query contains "OR", split it and implement the OR operator
@@ -97,7 +134,7 @@ vector<int> Operator::_Processing(Trie &trie, vector<string> &query, int k, Trie
         if (query.empty()) {    //  If query contains only filetype:TYPE
             auto it = plus.begin();
             for (int i = 0; i < min(k, (int)plus.size()); ++i) {
-                result.push_back(*it);
+                result.push_back(di(1,*it));
                 ++it;
             }
             return result;
@@ -114,6 +151,8 @@ vector<int> Operator::_Processing(Trie &trie, vector<string> &query, int k, Trie
 
     if (check_title)    
         return _Processing(trie, query, k, trie_title, is_intitle = true);
+
+    _Range(query);
 
     int index = 0;
     while (index < (int)query.size()) {
@@ -146,5 +185,7 @@ vector<int> Operator::_Processing(Trie &trie, vector<string> &query, int k, Trie
         ++index;
     }
     result = merge(result, _And(!is_intitle ? trie : trie_title, query, k), k);
+    for (auto it : result)
+        system(("echo " + to_string(it.second) + " >> log").c_str());
     return result;
 }

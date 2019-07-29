@@ -22,19 +22,22 @@ public:
     Operator(vector<string> sub);
 
     //  AND, $, #, " " Operator 
-    vector<int> _And(Trie &trie, vector<string> &query, int k);
+    vector<di> _And(Trie &trie, vector<string> &query, int k);
 
     //  OR Operator
-    vector<int> _Or(Trie &trie, vector<string> &query1, vector<string> &query2, int k, Trie& trie_title, bool& is_intitle);
+    vector<di> _Or(Trie &trie, vector<string> &query1, vector<string> &query2, int k, Trie& trie_title, bool& is_intitle);
 
     //  Synonym Operator
-    vector<int> _Synonym(Trie &trie, vector<string> &query, int index, int k); 
+    vector<di> _Synonym(Trie &trie, vector<string> &query, int index, int k); 
 
     //  Minus or Plus case 
     set<int> _Minus_Plus(Trie &trie, string s, int k);
 
+    //  Range case
+    void _Range(vector<string> &query);
+
     //  Query processing
-    vector<int> _Processing(Trie &trie, vector<string> &query, int k, Trie& trie_title, bool &is_intitle);
+    vector<di> _Processing(Trie &trie, vector<string> &query, int k, Trie& trie_title, bool &is_intitle);
 };
 
 

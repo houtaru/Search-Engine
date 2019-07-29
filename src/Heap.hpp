@@ -2,6 +2,7 @@
 #define __HEAP__
 
 #include <bits/stdc++.h>
+#define di pair<double, int>
 
 using namespace std;
 
@@ -15,7 +16,7 @@ struct Heap{
     
     void insert(pair<double, int> x);
     void heapify(int i, int size_sub);
-    vector<int> topk_result(int k);
+    vector<di> topk_result(int k);
 };
 
 #endif //__HEAP__

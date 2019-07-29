@@ -290,10 +290,13 @@ void Frontend::search_scr(Trie &trie, string input_search, Trie& trie_title) {
     Operator OPERATOR(type);
     vector<string> result;
     for (auto i : OPERATOR._Processing(trie, query, 5, trie_title, is_intitle))
-        result.push_back(name[i]);
+        result.push_back(name[i.second]);
     result.push_back("  BACK  ");
-    Clock = clock() - Clock;
 
+    Clock = clock() - Clock;
+    for (auto it : result)
+        system(("echo " + it + " >> log").c_str());
+    //exit(0);
     //  Print the Searching time
     attron(A_BOLD | COLOR_PAIR(YELLOW));
     mvprintw(9, 77, "Searching time: %.3f ms", (double)Clock*1000/CLOCKS_PER_SEC);
@@ -440,7 +443,6 @@ void mouse_main_scr(int &current_pointer, int x, int y) {
 
 void get_query(string &input_search, int &current_pointer, int x, int y, int width, Trie& trie) {
     move(x, y);   //  Set the cursor to be in the Search rectangle
-    curs_set(1);    //  Set cursor visible
     keypad(stdscr, true);
 
     string word, pre_word;
@@ -457,7 +459,6 @@ void get_query(string &input_search, int &current_pointer, int x, int y, int wid
             for (int j = (COLS - 75) / 2 + 1; j < (COLS - 75) / 2 + 75; ++j)
                 mvaddch(i, j, ' ');
 
-        curs_set(0);
         for (int i = 1; i <= suggests.size(); ++i) {
             string temp = input_search.substr(0, input_search.size() - word.size()) + suggests[i - 1];
             if (i == ptr) attron(A_REVERSE);
@@ -467,25 +468,22 @@ void get_query(string &input_search, int &current_pointer, int x, int y, int wid
         }
         refresh();
         move(a, b);
-        curs_set(1);
     };
     
     while (true) {
         //Display auto suggestion 
         if (!word.empty() && word != pre_word) {
-            system(("echo " + pre_word + " " + word + " >> log").c_str());
+            //system(("echo " + pre_word + " " + word + " >> log").c_str());
             suggests = trie.auto_suggestion(word, lim - 1);
             if (suggests[0].compare("null") != 0) {
                 ptr = 0;
                 lim = suggests.size() + 1;
                 can_suggest = true;
                 
-                curs_set(0);
                 draw_rectangle(LINES/2 + 1, (COLS - 75)/2, 6, 75, false);
                 updateSuggest(ptr);
 
             } else can_suggest = false;
-            curs_set(1);
             pre_word = word;
         }
 
@@ -544,7 +542,6 @@ void get_query(string &input_search, int &current_pointer, int x, int y, int wid
             mvaddch(a, b++, temp);
         }
     }
-    curs_set(0);
 }
 
 void reset() {
@@ -651,7 +648,7 @@ void Frontend::loading_scr() {
     Trie trie_title(256);
     trie_title.Intitle();
     Clock = clock() - Clock;
-    system(("echo " + String::toString(int(Clock * 100000)) + " >> log").c_str());
+    //system(("echo " + String::toString(int(Clock * 100000)) + " >> log").c_str());
     trie.Import();
     if (trie.Loading()) trie.Export();
     Clock = clock() - Clock;

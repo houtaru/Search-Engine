@@ -48,7 +48,7 @@ string Ranking::AllText(int idText) {
 }
 
 
-vector<int> Ranking::output(Trie &trie, vector<string> query, int k, set<int> &minus, set<int> &plus) {
+vector<di> Ranking::output(Trie &trie, vector<string> query, int k, set<int> &minus, set<int> &plus) {
     nText = trie.NumberOfText();
     // MAP is the list of distinct terms in query
     map<string, int> MAP;
@@ -106,10 +106,10 @@ vector<int> Ranking::output(Trie &trie, vector<string> query, int k, set<int> &m
     for (int i = 0; i < nText; ++i) {
         double length = sqrt(trie.SumSquareLength(i));
         if (length > 0.00001)
-            score[i] /= length;
+            score[i] /= length*1.0;
         if (score[i] > 0.00001) {
             score[i] *= pow(number_terms[i] * 1.0 / (int)query.size(), 5) * 1.0 / length_query;
-            heap.insert(pair<double, int>(score[i], i));
+            heap.insert(di(score[i], i));
         }
     }
     return heap.topk_result(k);
