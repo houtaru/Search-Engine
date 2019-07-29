@@ -4,6 +4,7 @@
 #include <bits/stdc++.h>
 #include <Heap.hpp>
 #include <Trie.hpp>
+#include <utils.h>
 #include <Engine/Utils/String.hpp>
 
 using namespace std;

@@ -284,7 +284,9 @@ void Frontend::search_scr(Trie &trie, string input_search, Trie& trie_title) {
     mvprintw(7, 76+1, input_search.c_str());
 
     Clock = clock();
-    vector<string> query =  String::split(input_search);
+    vector<string> query =  String::split(input_search, true);
+    for (auto it : query)
+        system(("echo " + it + " >> log").c_str());
 
     bool is_intitle = false;
     Operator OPERATOR(type);
