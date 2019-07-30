@@ -52,9 +52,11 @@ namespace String {
 
     // Splits #str according to #delim.
     // @return A vector of string, without the delimiter.
-    std::vector < std::string > split(const std::string& str, char delim = ' ', bool flag = false);
+    std::vector < std::string > split(const std::string& str, bool flag = false, char delim = ' ');
 
     std::string to_lower(std::string str);
+
+    bool isAlNum(char c);
 }
 
 #endif

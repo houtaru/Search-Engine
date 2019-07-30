@@ -9,11 +9,10 @@ std::vector < std::string > tokenizer(std::string text, int flag) {
         for (auto it : cur) {
             bool ok = true;
             std::string s;
-            for (char c : it) s.push_back(c);
+            for (char c : it) if (String::isAlNum(c) || c == '$' || c == '#')
+                s.push_back(c);
             if (ok && !s.empty()) result.push_back(s);
         }
-    } {
-        
     }
     return result;
 }

@@ -9,27 +9,35 @@
 #include <fstream> 
 #include <Engine/Utils/String.hpp>
 using namespace std;
-struct Operator
-{
-    Ranking ranking ; 
-    //And Operator 
-    vector<int>_And(Trie &trie, vector<string> query,int k);
+struct Operator {
+private:
+    Ranking ranking;
+    set<int> file_type;
+    set<int> minus, plus;
+    vector<string> type;
 
-    //Or Operator
-    vector<int>_Or(Trie &trie, vector<string> query1,vector<string> query2,int k );
+    bool is_intitle = false;
 
-    //Synonym Operator
-    vector<int>_Synonym(Trie &trie, string s,int k ) ; 
+public:
+    Operator(vector<string> sub);
 
-    //Minus case 
-    vector<int>_Minus(Trie &trie,vector<string> query,int k) ;
+    //  AND, $, #, " " Operator 
+    vector<di> _And(Trie &trie, vector<string> &query, int k);
 
-    //" " case
-    vector<int> _FullyAppear(Trie &trie,vector<string> query,int k) ;
+    //  OR Operator
+    vector<di> _Or(Trie &trie, vector<string> &query1, vector<string> &query2, int k, Trie& trie_title, bool& is_intitle);
 
-    //Range case 
-    vector<int> _range(Trie &trie, string s, int k ) ; 
- 
+    //  Synonym Operator
+    vector<di> _Synonym(Trie &trie, vector<string> &query, int index, int k); 
+
+    //  Minus or Plus case 
+    set<int> _Minus_Plus(Trie &trie, string s, int k);
+
+    //  Range case
+    void _Range(vector<string> &query);
+
+    //  Query processing
+    vector<di> _Processing(Trie &trie, vector<string> &query, int k, Trie& trie_title, bool &is_intitle);
 };
 
 

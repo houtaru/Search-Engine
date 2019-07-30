@@ -44,14 +44,13 @@ void Heap::heapify(int i, int size_sub) {
     }
 }
 
-vector<int> Heap::topk_result(int k) {
-    vector<int> result;
+vector<di> Heap::topk_result(int k) {
+    vector<di> result;
     
     for (int i = 0; i < k; ++i) { 
         if (i >= size())
             break;
-            
-        result.push_back(HEAP[0].second);
+        result.push_back(di(HEAP[0].first, HEAP[0].second));
         swap_mode(HEAP[0], HEAP[(size()-1) - i]);
         heapify(0, (size()-1) - i);
     }

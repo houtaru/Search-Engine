@@ -21,9 +21,13 @@ std::string String::trim(const std::string &str) {
     return ltrim(rtrim(str));
 }
 
-std::vector < std::string > String::split(const std::string& str, char delim, bool flag) {
+std::vector < std::string > String::split(const std::string& str, bool flag, char delim) {
     //std::string stopwords = "I a about an are as at be by com for from how in is it of on or that the this to was what when where who will with the www";
 
+    std::string delims[2] = {
+        "#$",
+        "!?~+:-$#*\"."
+    };
     std::vector < std::string > result;
     std::string cur;
     
@@ -48,10 +52,10 @@ std::vector < std::string > String::split(const std::string& str, char delim, bo
                 result.push_back(to_lower(cur));
             }
             cur.clear();
-        } else if (isalnum(str[i]) || std::string("+:-$#*\"").find(str[i]) != std::string::npos) {
-            cur += str[i];
         } else if (i + 2 < str.size() && str[i] == '.' && str[i + 1] == '.') {
             cur += str[i]; cur += str[++i];
+        } else if (isalnum(str[i]) || delims[flag].find(str[i]) != std::string::npos) {
+            cur += str[i];
         }
     }
     if (!cur.empty()) result.push_back(to_lower(cur));
@@ -61,4 +65,9 @@ std::vector < std::string > String::split(const std::string& str, char delim, bo
 std::string String::to_lower(std::string str) {
     boost::algorithm::to_lower(str);
     return str;
+}
+
+
+bool String::isAlNum(char c) {
+    return ('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z') || ('0' <= c && c <= '9');
 }

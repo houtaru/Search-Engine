@@ -21,9 +21,12 @@ private:
     std::map<int, long long> UsedText;
 public:
     Node * root;
+    Trie();
     Trie(int nChild);
     
     ~Trie();
+
+    void init(int nChild);
     
     bool HasText(int id);
     int NumberOfText();
@@ -50,6 +53,9 @@ public:
 
     //Auto suggestion
     std::vector < std::string > auto_suggestion(std::string text, int lim = 5);
+
+    //Import and Export data of search intitle
+    void Intitle();
 };
 
 class Aho_Corasick {

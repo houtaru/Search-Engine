@@ -6,7 +6,7 @@ data
 Data
 TextData
 TextData2
-src/main.cpp
+Synonym_data
 .directory
 *.o
 main.cpp
