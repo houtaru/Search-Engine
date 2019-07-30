@@ -8,6 +8,8 @@
 #include <Operator.hpp>
 #include <Trie.hpp>
 
+#include <aho_ver2.hpp>
+
 using namespace std;
 
 struct Frontend {
