@@ -273,15 +273,22 @@ void mouse_search_scr(int &current_pointer, int x, int y, vector<string> result)
 
 void Frontend::search_scr(Trie &trie, string input_search, Trie& trie_title) {
     //Add queries to history
-    system(("echo " + input_search + " >> Data/history.data").c_str());
+    //system(("echo " + input_search + " >> Data/history.data").c_str());
     
     clear_scr(3, LINES - 3); 
     MEVENT mouse;
     mousemask(ALL_MOUSE_EVENTS, NULL);
+    keypad(stdscr, true);
 
     draw_logo(- LINES/2 + 8 + 3, - COLS/2 + 51/2 + 15); //  8 == logo.size() and 51 == logo[0].size()
     draw_rectangle(6, 76, 2, 75);    //  Draw SEARCH_BAR besides the logo
     mvprintw(7, 76+1, input_search.c_str());
+
+    draw_rectangle(LINES - 8, (COLS - 9)/2, 2, 9) ;   //  Draw BACK 
+    attron(COLOR_PAIR(CYAN) | A_BOLD);
+    mvprintw(LINES-8 + 1, (COLS - 9)/2 + 1, "  BACK  ");
+    attroff(COLOR_PAIR(CYAN) | A_BOLD);
+    refresh();
 
     Clock = clock();
     vector<string> query =  String::split(input_search, true);
@@ -289,14 +296,10 @@ void Frontend::search_scr(Trie &trie, string input_search, Trie& trie_title) {
     bool is_intitle = false;
     Operator OPERATOR(type);
     vector<string> result;
-    for (auto i : OPERATOR._Processing(trie, query, 5, trie_title, is_intitle))
+    for (auto i : OPERATOR._Processing(trie, query, 5, trie_title, is_intitle)) 
         result.push_back(name[i.second]);
-    result.push_back("  BACK  ");
 
     Clock = clock() - Clock;
-    // for (auto it : result)
-    //     system(("echo " + it + " >> log").c_str());
-    //exit(0);
     //  Print the Searching time
     attron(A_BOLD | COLOR_PAIR(YELLOW));
     mvprintw(9, 77, "Searching time: %.3f ms", (double)Clock*1000/CLOCKS_PER_SEC);
@@ -309,62 +312,107 @@ void Frontend::search_scr(Trie &trie, string input_search, Trie& trie_title) {
         }
     }
 
-    int current_pointer = -1, size = (int)result.size();
-    while (true) {
-        draw_rectangle(LINES - 8, (COLS - 9)/2, 2, 9) ;   //  Draw BACK 
-        //  Print result and BACK content
-        for (int i = 0; i < size; ++i) {
-            attron(A_BOLD);
-            if (i == size - 1) {
-                attron(COLOR_PAIR(CYAN));
-                mvprintw(LINES-8 + 1, (COLS - 9)/2 + 1, result[i].c_str());
-                attroff(COLOR_PAIR(CYAN));
+    // Pre-process Ahocorasick      
+    vector <string> texts((int) result.size());              
+    map <int, int> highlight[22];      // Can highlight
+    Aho::aho_corasick aho(query);       // Construct Aho-corasick tree
+    
+    for (int i = 0; i < (int) result.size(); ++i) {
+        string temp; char c;
+        ifstream fin("TextData2/" + result[i]);
+
+        // Read file
+        while (fin.get(c)) if (0 <= c && c < 256) temp.push_back(c);
+        texts[i] = temp;
+
+        // Calculate all position that pattern can appear.
+        vector < vector <int> > pos = aho.find_position_in(temp);
+
+        ofstream fout("log", ios::app);
+        for (auto it : query) fout << it << ";";
+        fout << "\n";
+        fout << result[i] << "\n";
+        for (int k = 0; k < (int) query.size(); ++k) {
+            for (int j = 0, p = pos[k][j]; j < (int) pos[k].size(); p = pos[k][++j]) {
+                fout << p << " ";
             }
-            else {
-                attron(A_UNDERLINE | COLOR_PAIR(MAGENTA));
-                mvprintw(13 + 5*i, 70, result[i].c_str());
-                attroff(A_UNDERLINE | COLOR_PAIR(MAGENTA));
-            }
-            attroff(A_BOLD); 
+            fout << "\n";
         }
-        if (size == 1) { //  No matching result
+        fout.close();
+        
+        // Compute continuous subsequence will show in preview
+        system(("echo " + String::toString(query.size()) + " >> log").c_str());
+        for (int k = 0; k < (int) query.size(); ++k) if (!pos[k].empty()) {
+            system(("echo " + String::toString(k) + " >> log").c_str());
+            for (int j = 0; j < (int) pos[k].size(); ++j) { 
+                int p = pos[k][j];   
+                if (!j || (j && p != pos[k][j- 1])) {    // @warn Duplicated case.
+                    bool ok = true;
+
+                    // Character before patterm in #temp# is not a alphaber or number.
+                    if (p > 0 && String::isAlNum(temp[p - 1])) ok = false;      
+
+                    // Character after patterm in #temp is not a alphaber or number.
+                    if (p + query[k].size() <= temp.size() && String::isAlNum(temp[p + query[k].size()])) ok = false;
+                    
+                    // If patterm is satisfied
+                    if (ok == true) {       
+                        for (int x = 0; x < (int) query[k].size() && p + x < temp.size(); ++x) 
+                            highlight[i][p + x] = k;
+                    }
+                }    
+            }
+            system(("echo done " + String::toString(k) + " >> log").c_str());
+            //exit(0);
+        }
+    }
+
+    auto updatePreview = [&] (int X) {
+        clear_scr(13, LINES - 8 - 2);
+        
+        // No matching result!!
+        if (result.empty()) {       
             attron(A_BLINK | A_BOLD | COLOR_PAIR(RED));
             mvprintw(LINES/2, (COLS - 21)/2, "NO MATCHING RESULT!!!");
             attroff(A_BLINK | A_BOLD | COLOR_PAIR(RED));
+            refresh();
+            return;
         }
+        
+        for (int k = X; k < min(X + 5, (int) result.size()); ++k) {
+            // Print Filename
+            int x = 13 + 5 * (k - X), y = 70;
 
-          // Show some thing
-        Aho_Corasick Aho(256);
-        for (auto x : query) {
-            Aho.Insert(x);
-        }
-        for (int i = 0; i < size - 1; ++i) {
-            int numchar = 210;
-            ifstream data("TextData2/" + result[i]);
-            string st, temp;
-            while (data >> temp) {
-                for (char c : temp) if (0 <= c && c < 256) {
-                    st.push_back(c);
-                }
-                st.push_back(' ');
+            attron(A_BOLD | A_UNDERLINE | COLOR_PAIR(MAGENTA));
+            mvprintw(x, y, result[k].c_str());
+            attroff(A_BOLD | A_UNDERLINE | COLOR_PAIR(MAGENTA));
+
+            // Print preview
+            int l = highlight[k].begin()->first, r;
+            for (auto it : highlight[k]) if (it.first + query[it.second].size() - l < 200) {
+                r = it.first + query[it.second].size();
             }
-            vector<int> appear(st.size(), 0);
-            int r = Aho.ValueTrace(st, appear, numchar) + 1;
-            int l = max(0, r - numchar);
-            int cnt = is_intitle ? 1 : 1e5;
-            for (int _ = l; _ < r; _ += 70) {
-                bool can_high_light = cnt > 0;
-                for (int j = _; j < min(_ + 70, r); ++j) {
-                    string c; c.push_back(st[j]);
-                    if (appear[j] && can_high_light) { attron(A_BOLD); attron(A_REVERSE); }
-                    mvprintw(14 + (_ - l) / 70 + 5 * i, 75 + (j - _), c.c_str());
-                    if (appear[j] && can_high_light) { attroff(A_BOLD); attroff(A_REVERSE); }
+            
+            bool end_title = false;
+            x = 14 + 5 * (k - X);       y = 75;
+            for (int i = l; i < r; ++i) {
+                if ((texts[k][i] == '.' && (i + 1 == texts[k].size() || (i + 1 < texts[k].size() && texts[k][i + 1] != '.'))) || string("\n!?").find(texts[k][i]) != string::npos)
+                    end_title = true;
+                
+                if (!end_title && highlight[k].count(i)) attron(A_BOLD | A_REVERSE);
+                mvaddch(x, y++, texts[k][i]);
+                if (!end_title && highlight[k].count(i)) attroff(A_BOLD | A_REVERSE);
+                
+                if ((i - l) / 70 == 0) {
+                    x++, y = 75;
                 }
-                cnt--;
             }
         }
+        refresh();
+    };
 
-
+    int current_pointer = -1, l = 0, size = (int) result.size();
+    while (true) {
         int input = getch();
         bool exit_while = false;
         switch (input) {
@@ -375,23 +423,23 @@ void Frontend::search_scr(Trie &trie, string input_search, Trie& trie_title) {
                         switch (current_pointer) {
                             case DOCUMENT1:
                                 if (size > 1)
-                                    view_document(query, result[0], is_intitle);
+                                    view_document(query, result[l], is_intitle);
                                 break;
                             case DOCUMENT2:
                                 if (size > 2)
-                                    view_document(query, result[1], is_intitle);
+                                    view_document(query, result[l + 1], is_intitle);
                                 break;
                             case DOCUMENT3:
                                 if (size > 3)
-                                    view_document(query, result[2], is_intitle);
+                                    view_document(query, result[l + 2], is_intitle);
                                 break;
                             case DOCUMENT4:
                                 if (size > 4)
-                                    view_document(query, result[3], is_intitle);
+                                    view_document(query, result[l + 3], is_intitle);
                                 break;
                             case DOCUMENT5:
                                 if (size > 5)
-                                    view_document(query, result[4], is_intitle);
+                                    view_document(query, result[l + 4], is_intitle);
                                 break;
                             case BACK:
                                 exit_while = true;
@@ -403,17 +451,24 @@ void Frontend::search_scr(Trie &trie, string input_search, Trie& trie_title) {
                 }
                 break;
             }
+            case KEY_UP:
+                if (l > 0) l--;
+                break;
+            case KEY_DOWN:
+                if (l + 5 <= size) l++;
+                break;
             case '\n':
                 exit_while = true;
                 break;
         }
 
-       
+        updatePreview(l);
+
         if (exit_while) //  If user choose BACK
             break;
-
         refresh();
     }
+
     clear_scr(3, LINES - 3);
 }
 

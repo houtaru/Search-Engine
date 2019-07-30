@@ -100,7 +100,7 @@ vector<di> Ranking::output(Trie &trie, vector<string> query, int k, set<int> &mi
                 Aho.Insert(word);            
                 df.clear();
                 for (int idText : FullyAppearance(trie, String::split(word))) {
-                    system(("echo " + std::to_string(idText) + ' ' + std::to_string(0) + " >> log.txt").c_str());
+                    //system(("echo " + std::to_string(idText) + ' ' + std::to_string(0) + " >> log.txt").c_str());
                     int val = Aho.Value(String::to_lower(AllText(idText)));
                     if (val) {
                         //system(("echo " + std::to_string(idText) + ' ' + std::to_string(val) + " >> log.txt").c_str());
