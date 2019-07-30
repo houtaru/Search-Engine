@@ -285,8 +285,6 @@ void Frontend::search_scr(Trie &trie, string input_search, Trie& trie_title) {
 
     Clock = clock();
     vector<string> query =  String::split(input_search, true);
-    for (auto it : query)
-        system(("echo " + it + " >> log").c_str());
 
     bool is_intitle = false;
     Operator OPERATOR(type);
@@ -296,8 +294,8 @@ void Frontend::search_scr(Trie &trie, string input_search, Trie& trie_title) {
     result.push_back("  BACK  ");
 
     Clock = clock() - Clock;
-    for (auto it : result)
-        system(("echo " + it + " >> log").c_str());
+    // for (auto it : result)
+    //     system(("echo " + it + " >> log").c_str());
     //exit(0);
     //  Print the Searching time
     attron(A_BOLD | COLOR_PAIR(YELLOW));
