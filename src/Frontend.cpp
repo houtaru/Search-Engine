@@ -273,7 +273,7 @@ void mouse_search_scr(int &current_pointer, int x, int y, vector<string> result)
 
 void Frontend::search_scr(Trie &trie, string input_search, Trie& trie_title) {
     //Add queries to history
-    //system(("echo " + input_search + " >> Data/history.data").c_str());
+    system(("echo " + input_search + " >> Data/history.data").c_str());
     
     clear_scr(3, LINES - 3); 
     MEVENT mouse;
@@ -285,7 +285,7 @@ void Frontend::search_scr(Trie &trie, string input_search, Trie& trie_title) {
 
     Clock = clock();
     vector<string> query =  String::split(input_search, true);
-    
+
     bool is_intitle = false;
     Operator OPERATOR(type, name);
     vector<string> result;
@@ -294,9 +294,7 @@ void Frontend::search_scr(Trie &trie, string input_search, Trie& trie_title) {
     result.push_back("  BACK  ");
 
     Clock = clock() - Clock;
-    // for (auto it : result)
-    //     system(("echo " + it + " >> log").c_str());
-    //exit(0);
+
     //  Print the Searching time
     attron(A_BOLD | COLOR_PAIR(YELLOW));
     mvprintw(9, 77, "Searching time: %.3f ms", (double)Clock*1000/CLOCKS_PER_SEC);
@@ -544,11 +542,86 @@ void get_query(string &input_search, int &current_pointer, int x, int y, int wid
     }
 }
 
+
 void reset() {
     for (int i = 0; i < 74; ++i)
         mvaddch(LINES/2, (COLS - 75)/2 + i+1, ' ');
     refresh();
 }
+
+
+enum {
+    CLEAR,
+    CLOSE
+};
+
+
+void mouse_history_scr(int &current_pointer, int x, int y) {
+    if (x == LINES-9) {
+        if (y > 5 + (40-26)/2 && y < 13 + (40-26)/2)
+            current_pointer = CLEAR;
+        else if (y > 5 + (40+10)/2 && y < 13 + (40+10)/2)
+            current_pointer = CLOSE;
+    }
+}
+
+
+void history(){
+    ifstream fin ; 
+    fin.open("Data/history.data") ;
+    draw_rectangle(7, 5, LINES-14, 40);
+     
+    attron(A_BOLD | COLOR_PAIR(MAGENTA));
+    mvprintw(9, 5 + (40-6)/2, "HISTORY");
+    attroff(A_BOLD | COLOR_PAIR(MAGENTA));
+
+    attron(A_BOLD | COLOR_PAIR(CYAN));
+    mvprintw(LINES-9, 5 + (40-26)/2, "[ CLEAR ]");
+    mvprintw(LINES-9, 5 + (40+10)/2, "[ CLOSE ]");
+    attroff(A_BOLD | COLOR_PAIR(CYAN));
+
+    vector<string> history;
+    string sub;
+    while (getline(fin, sub)) {
+        history.push_back(sub);
+        system(("echo " + sub + " >> log").c_str());
+    }
+
+    for (int i = 0; i < (int)history.size(); ++i)
+        mvprintw(13 + 2*i, 5 + 5, history[i].c_str());
+    
+    MEVENT mouse;
+    mousemask(ALL_MOUSE_EVENTS, NULL);
+    int current_pointer = -1;
+    while (true) {
+        int input = getch();
+        bool exit_while = false;
+        switch (input) {
+            case KEY_MOUSE: {
+                if (getmouse(&mouse) == OK) {
+                    if (mouse.bstate & BUTTON1_CLICKED) {
+                        mouse_history_scr(current_pointer, mouse.y, mouse.x);
+                        switch (current_pointer) {
+                            case CLEAR: {
+                                system("echo > Data/history.data");
+                                break;
+                            }
+                            case CLOSE: {
+                                exit_while = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                break;
+            }
+        }
+        if (exit_while)
+            break;
+    }
+    clear_scr(7, LINES-7); 
+}
+
 
 void Frontend::main_scr(Trie &trie, Trie& trie_title) {
     MEVENT mouse;
@@ -594,7 +667,7 @@ void Frontend::main_scr(Trie &trie, Trie& trie_title) {
                 break;
             }
             case HISTORY: {
-                reset();
+                history();
                 current_pointer = SEARCH_BAR;
                 input_search.clear();
                 break;

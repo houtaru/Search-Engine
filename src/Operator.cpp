@@ -66,9 +66,20 @@ vector<di> Operator:: _Synonym(Trie &trie, vector<string> &query, int index, int
 //  List of documents containing minus word
 set<int> Operator::_Minus_Plus(Trie &trie, string s, int k ) {
     set<int> result;
-    for (auto it : trie.Search(s))
-        result.insert(it.first);
-    return result;
+    Ranking ranking ; 
+    if (s[0] != '"') {
+        for (auto it : trie.Search(s))
+            result.insert(it.first);
+        return result;
+    }
+    else {
+        s.erase(s.begin()); s.pop_back() ; 
+        vector<string> query = String::split(s) ;
+        vector<int> result1 = FullyAppearance(trie, query) ;
+        for (auto it :result1)
+            result.insert(it) ; 
+        return result ;  
+    }
 }
 
 
@@ -76,6 +87,21 @@ set<int> Operator::_Minus_Plus(Trie &trie, string s, int k ) {
 void Operator::_Range(vector<string> &query) {
     bool check = false;
     int i, j;
+    vector<int> remove;
+    for (i = 0 ; i < (int)query.size(); ++i) {
+        int count_dot = 0;
+        for (j = 0; j < query[i].length(); j++) {
+            if (query[i][j] == '.')
+                ++count_dot;
+            if (count_dot > 2)
+                remove.push_back(i);
+        }
+    }
+    if (!remove.empty()) {
+        for (int i = (int)remove.size()-1; i >=0; --i)
+            query.erase(query.begin() + remove[i]);
+    }
+
     for (i = 0 ; i < (int)query.size(); ++i) {
         for (j = 0; j < query[i].length()-1; j++)
             if (query[i][j] == '.' && query[i][j+1] == '.') {
@@ -90,12 +116,27 @@ void Operator::_Range(vector<string> &query) {
         string s1, s2;
         s1 = query[i].substr(0, j);
         s2 = query[i].substr(j + 2, query[i].length() - 2 - j);
+        for (int i = 1; i < (int)s1.size(); ++i)
+            if (s1[i] > 57 || s1[i] < 48)
+                return;
+        for (int i = 1; i < (int)s2.size(); ++i)
+            if (s2[i] > 57 || s2[i] < 48)
+                return;
+        if (s1[0] != '$' && (s1[0] > 57 || s1[0] < 48))
+            return;
+        if (s2[0] != '$' && (s2[0] > 57 || s2[0] < 48))
+            return;
+
         bool check_dollar = false;
         if (s1[0] == '$') {
             s1.erase(s1.begin());
+            check_dollar = true;
+        }
+        if (s1[0] == '$') {
             s2.erase(s2.begin());
             check_dollar = true;
         }
+        
         int first = stoi(s1), second = stoi(s2);
         for (int i = first; i <= second; ++i) {
             query.push_back((check_dollar ? "$" : "") + to_string(i));
