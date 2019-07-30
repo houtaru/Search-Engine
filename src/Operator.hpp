@@ -8,6 +8,7 @@
 #include <algorithm> 
 #include <fstream> 
 #include <Engine/Utils/String.hpp>
+#include <aho_ver2.hpp>
 using namespace std;
 struct Operator {
 private:
@@ -15,11 +16,12 @@ private:
     set<int> file_type;
     set<int> minus, plus;
     vector<string> type;
+    vector<string> name;
 
     bool is_intitle = false;
 
 public:
-    Operator(vector<string> sub);
+    Operator(vector<string> sub_type, vector<string> sub_name);
 
     //  AND, $, #, " " Operator 
     vector<di> _And(Trie &trie, vector<string> &query, int k);
@@ -35,6 +37,9 @@ public:
 
     //  Range case
     void _Range(vector<string> &query);
+
+    //  Wildcard case
+    vector<di> _Wildcard(Trie &trie, vector<string> query, int index_asterisk, int k);
 
     //  Query processing
     vector<di> _Processing(Trie &trie, vector<string> &query, int k, Trie& trie_title, bool &is_intitle);

@@ -9,11 +9,12 @@
 
 using namespace std;
 
+
+vector<int> FullyAppearance(Trie &trie, vector<string> query);
 struct Ranking{
     int nText;
     vector<di> output(Trie &trie, vector<string> query, int k, set<int> &minus, set<int> &plus);
     double weight_query(Trie &trie, string term, int count);
-    vector<int> FullyAppearance(Trie & trie, vector<string> query);
 };
 
 #endif //__RANKING__

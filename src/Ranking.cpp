@@ -1,15 +1,6 @@
 #include <Ranking.hpp>
 
-double Ranking::weight_query(Trie &trie, string term, int count) {
-    
-    //  Get the number of documents containing term
-    map<int, int> df = trie.Search(term);
-    int df_term = df.size();
-
-    return df_term ? log(1 + count * 1.0) * log(1 + nText * 1.0 / df_term) : 0;
-}
-
-vector<int> Ranking::FullyAppearance(Trie & trie, vector<string> query) {
+vector<int> FullyAppearance(Trie & trie, vector<string> query) {
     if (!query.size()) 
         return vector<int>(0);
     const int nText = trie.NumberOfText();
@@ -30,6 +21,17 @@ vector<int> Ranking::FullyAppearance(Trie & trie, vector<string> query) {
     }
     return res;
 }
+
+double Ranking::weight_query(Trie &trie, string term, int count) {
+    
+    //  Get the number of documents containing term
+    map<int, int> df = trie.Search(term);
+    int df_term = df.size();
+
+    return df_term ? log(1 + count * 1.0) * log(1 + nText * 1.0 / df_term) : 0;
+}
+
+
 
 // vector<int> Ranking::FullyAppearance(Trie &trie, vector<string> query) {
 //     if (query.empty())
@@ -119,3 +121,4 @@ vector<di> Ranking::output(Trie &trie, vector<string> query, int k, set<int> &mi
     }
     return heap.topk_result(k);
 }
+

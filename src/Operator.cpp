@@ -1,6 +1,9 @@
 #include <Operator.hpp> 
 
-Operator::Operator(vector<string> sub) { type = sub; }
+Operator::Operator(vector<string> sub_type, vector<string> sub_name) { 
+    type = sub_type; 
+    name = sub_name;    
+}
 
 //  Merge 2 results into a single result
 vector<di> merge(vector<di> result1, vector<di> result2, int k) {
@@ -101,6 +104,74 @@ void Operator::_Range(vector<string> &query) {
 }
 
 
+//  Wildcard case
+vector<di> Operator::_Wildcard(Trie &trie, vector<string> query, int index_asterisk, int k) {
+    vector<string> part1; part1.insert(part1.end(), query.begin(), query.begin() + index_asterisk);
+    vector<string> part2; part2.insert(part2.end(), query.begin() + index_asterisk+1, query.end());
+
+    vector<int> text1_vec = FullyAppearance(trie, part1);
+    vector<int> text2_vec = FullyAppearance(trie, part2);
+
+    set<int> text1, text2, text;
+    for (int i = 0; i < (int)text1_vec.size(); ++i)
+        text1.insert(text1_vec[i]);
+    for (int i = 0; i < (int)text2_vec.size(); ++i)
+        text2.insert(text2_vec[i]);
+    for (auto i = text1.begin(); i != text1.end(); ++i)
+        if (text2.find(*i) != text2.end())
+            text.insert(*i);
+    // for (auto it = text.begin(); it != text.end(); ++it) {
+    //     system(("echo " + name[*it] + " >> log").c_str());
+    // }
+    // exit(0);
+    string s1, s2;
+    //s1.push_back('\"'); s2.push_back('\"');
+    for (int i = 0; i < (int)part1.size(); ++i) {
+        s1 += part1[i];
+        s1.push_back(' ');
+    }
+    s1.pop_back(); //s1.push_back('\"');
+    for (int i = 0; i < (int)part2.size(); ++i) {
+        s2 += part2[i];
+        s2.push_back(' ');
+    }
+    s2.pop_back(); //s2.push_back('\"');
+    
+    int nText = trie.NumberOfText();
+    vector<double> score(nText);
+    for (auto it = text.begin(); it != text.end(); ++it) {
+        vector<string> query_mod;
+        query_mod.push_back(s1);
+        query_mod.push_back(s2);
+
+        Aho::aho_corasick aho(query_mod);
+        vector<vector<int>> result = aho.find_position_in(String::to_lower(AllText(*it)));
+        int k1 = aho.all[query_mod[0]];
+        int k2 = aho.all[query_mod[1]];
+        for (int i = 0; i <(int)result[k1].size(); ++i) {
+            for (int j = 0; j < (int)result[k2].size(); ++j) {
+                int distance = result[k2][j] - result[k1][i] - (int)query[0].size();
+                //system(("echo " + to_string(distance) + " >> log").c_str());
+                if (distance >= 1 && distance < 50) {
+                    score[*it] += 50 - distance;
+                }
+
+            }
+            //exit(0);
+        }
+    }
+
+    Heap heap;
+    for (int i = 0; i < nText; ++i) 
+        if (score[i] > 0.5) {
+            heap.insert(di(score[i], i));
+            //system(("echo " + to_string(score[i]) + " " + to_string(i) + " >> log").c_str());
+    }
+
+    return heap.topk_result(k);
+}
+
+
 vector<di> Operator::_Processing(Trie &trie, vector<string> &query, int k, Trie& trie_title, bool& is_intitle) {
     vector<di> result;
 
@@ -140,7 +211,6 @@ vector<di> Operator::_Processing(Trie &trie, vector<string> &query, int k, Trie&
             return result;
         }
     }
-    
     bool check_title = false;   //  Handle the intitle case
     for (int i = 0; i < (int) query.size(); ++i) 
         if (query[i].size() > 8 && query[i].substr(0, 8) == "intitle:") {
@@ -151,6 +221,20 @@ vector<di> Operator::_Processing(Trie &trie, vector<string> &query, int k, Trie&
 
     if (check_title)    
         return _Processing(trie, query, k, trie_title, is_intitle = true);
+
+    //  Handle case *
+    int index_asterisk = 0;
+    int count_asterisk = 0;
+    for (int i = 0; i < (int)query.size(); ++i) {
+        if (query[i] == "*") {
+            ++count_asterisk;
+            index_asterisk = i;
+        }
+    }
+    if (count_asterisk > 1)
+        return result;
+    if (count_asterisk == 1)
+        return _Wildcard(is_intitle ? trie_title : trie, query, index_asterisk, k);
 
     _Range(query);
 

@@ -31,11 +31,13 @@ string AllText(int idText) {
     ifstream fin("TextData2/___index.txt");
     string st;
     while (getline(fin, st)) filename.push_back(st);
+    fin.close();
     ifstream data("TextData2/" + filename[idText]);
     string result;
     while (getline(data, st)) {
         for (char c : st) result.push_back(c);
         result.push_back(' ');
     }
+    data.close();
     return result;
 }
