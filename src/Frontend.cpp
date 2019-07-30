@@ -549,7 +549,39 @@ void reset() {
         mvaddch(LINES/2, (COLS - 75)/2 + i+1, ' ');
     refresh();
 }
-
+void draw_history(){
+    ifstream fin ; 
+    int i=0 ; 
+    fin.open("Data/history.data")  ;
+    draw_rectangle(10,5,40,30) ;
+    draw_rectangle(51,6+(30-13)/2,2,13) ; 
+     
+    mvprintw(11,5+(30-7)/2,"HISTORY") ;
+    mvprintw(52,6+(30-5)/2,"CLEAR") ;
+    while (fin.is_open() && !fin.eof()){
+        string s ;
+        getline(fin,s) ; 
+        ++i; 
+        system(("echo " + s + " >> log").c_str());
+        mvprintw(11+i,6,s.c_str()) ; 
+    }
+    
+    MEVENT mouse;
+    int input = getch();
+        if (input == KEY_MOUSE) {
+            if (getmouse(&mouse) == OK) {
+                if (mouse.bstate & BUTTON1_CLICKED) {
+                    //CLEAR 
+                    if (mouse.y >=51 && mouse.y<=53 && mouse.x >= 6+(13-5)/2 && mouse.x <= 6+13)
+                        {
+                            system("> Data/history.data")  ;
+                            refresh() ; 
+                        }    
+                }
+            }
+        }
+    clear_scr(3,LINES-3) ; 
+}
 void Frontend::main_scr(Trie &trie, Trie& trie_title) {
     MEVENT mouse;
     mousemask(ALL_MOUSE_EVENTS, NULL);
@@ -594,7 +626,7 @@ void Frontend::main_scr(Trie &trie, Trie& trie_title) {
                 break;
             }
             case HISTORY: {
-                reset();
+                draw_history();
                 current_pointer = SEARCH_BAR;
                 input_search.clear();
                 break;
@@ -616,7 +648,7 @@ void Frontend::main_scr(Trie &trie, Trie& trie_title) {
 
 void Frontend::loading_scr() {
     //Clear old history data
-    system("rm -f Data/history.data");
+    //system("rm -f Data/history.data");
 
     //  Initializing for ncurses
     initscr();
