@@ -145,7 +145,7 @@ vector<di> Operator::_Processing(Trie &trie, vector<string> &query, int k, Trie&
     for (int i = 0; i < (int) query.size(); ++i) 
         if (query[i].size() > 8 && query[i].substr(0, 8) == "intitle:") {
         query[i].erase(query[i].begin(), query[i].begin() + 8);
-        system(("echo " + query[i] + " >> log").c_str());
+        //system(("echo " + query[i] + " >> log").c_str());
         check_title = true;
     }
 
@@ -185,7 +185,7 @@ vector<di> Operator::_Processing(Trie &trie, vector<string> &query, int k, Trie&
         ++index;
     }
     result = merge(result, _And(!is_intitle ? trie : trie_title, query, k), k);
-    for (auto it : result)
-        system(("echo " + to_string(it.second) + " >> log").c_str());
+    //for (auto it : result)
+        //system(("echo " + to_string(it.second) + " >> log").c_str());
     return result;
 }

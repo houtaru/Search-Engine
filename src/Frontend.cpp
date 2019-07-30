@@ -273,7 +273,7 @@ void mouse_search_scr(int &current_pointer, int x, int y, vector<string> result)
 
 void Frontend::search_scr(Trie &trie, string input_search, Trie& trie_title) {
     //Add queries to history
-    system(("echo " + input_search + " >> Data/history.data").c_str());
+    //system(("echo " + input_search + " >> Data/history.data").c_str());
     
     clear_scr(3, LINES - 3); 
     MEVENT mouse;

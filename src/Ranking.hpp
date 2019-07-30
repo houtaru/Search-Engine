@@ -14,7 +14,6 @@ struct Ranking{
     vector<di> output(Trie &trie, vector<string> query, int k, set<int> &minus, set<int> &plus);
     double weight_query(Trie &trie, string term, int count);
     vector<int> FullyAppearance(Trie & trie, vector<string> query);
-    string AllText(int id);
 };
 
 #endif //__RANKING__

@@ -23,3 +23,19 @@ std::string Lowercase(std::string st) {
     }
     return st;
 }
+
+
+// Convert all text to a string
+string AllText(int idText) {
+    vector<string> filename;
+    ifstream fin("TextData2/___index.txt");
+    string st;
+    while (getline(fin, st)) filename.push_back(st);
+    ifstream data("TextData2/" + filename[idText]);
+    string result;
+    while (getline(data, st)) {
+        for (char c : st) result.push_back(c);
+        result.push_back(' ');
+    }
+    return result;
+}

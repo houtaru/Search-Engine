@@ -51,6 +51,7 @@ vector<di> Heap::topk_result(int k) {
         if (i >= size())
             break;
         result.push_back(di(HEAP[0].first, HEAP[0].second));
+        system(("echo " + to_string(result.back().first) + " " + to_string(result.back().second) + " >> log").c_str());
         swap_mode(HEAP[0], HEAP[(size()-1) - i]);
         heapify(0, (size()-1) - i);
     }
