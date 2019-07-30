@@ -1,15 +1,6 @@
 #include <Ranking.hpp>
 
-double Ranking::weight_query(Trie &trie, string term, int count) {
-    
-    //  Get the number of documents containing term
-    map<int, int> df = trie.Search(term);
-    int df_term = df.size();
-
-    return df_term ? log(1 + count * 1.0) * log(1 + nText * 1.0 / df_term) : 0;
-}
-
-vector<int> Ranking::FullyAppearance(Trie & trie, vector<string> query) {
+vector<int> FullyAppearance(Trie & trie, vector<string> query) {
     if (!query.size()) 
         return vector<int>(0);
     const int nText = trie.NumberOfText();
@@ -30,6 +21,17 @@ vector<int> Ranking::FullyAppearance(Trie & trie, vector<string> query) {
     }
     return res;
 }
+
+double Ranking::weight_query(Trie &trie, string term, int count) {
+    
+    //  Get the number of documents containing term
+    map<int, int> df = trie.Search(term);
+    int df_term = df.size();
+
+    return df_term ? log(1 + count * 1.0) * log(1 + nText * 1.0 / df_term) : 0;
+}
+
+
 
 // vector<int> Ranking::FullyAppearance(Trie &trie, vector<string> query) {
 //     if (query.empty())
@@ -52,24 +54,9 @@ vector<int> Ranking::FullyAppearance(Trie & trie, vector<string> query) {
 // }
 
 
-// Convert all text to a string
-string Ranking::AllText(int idText) {
-    vector<string> filename;
-    ifstream fin("TextData2/___index.txt");
-    string st;
-    while (getline(fin, st)) filename.push_back(st);
-    ifstream data("TextData2/" + filename[idText]);
-    string result;
-    while (getline(data, st)) {
-        for (char c : st) result.push_back(c);
-        result.push_back(' ');
-    }
-    return result;
-}
-
-
 vector<di> Ranking::output(Trie &trie, vector<string> query, int k, set<int> &minus, set<int> &plus) {
     nText = trie.NumberOfText();
+    
     // MAP is the list of distinct terms in query
     map<string, int> MAP;
     for (int i = 0; i < (int)query.size(); ++i)
@@ -100,7 +87,7 @@ vector<di> Ranking::output(Trie &trie, vector<string> query, int k, set<int> &mi
                 Aho.Insert(word);            
                 df.clear();
                 for (int idText : FullyAppearance(trie, String::split(word))) {
-                    system(("echo " + std::to_string(idText) + ' ' + std::to_string(0) + " >> log.txt").c_str());
+                    //system(("echo " + std::to_string(idText) + ' ' + std::to_string(0) + " >> log.txt").c_str());
                     int val = Aho.Value(String::to_lower(AllText(idText)));
                     if (val) {
                         //system(("echo " + std::to_string(idText) + ' ' + std::to_string(val) + " >> log.txt").c_str());
@@ -134,3 +121,4 @@ vector<di> Ranking::output(Trie &trie, vector<string> query, int k, set<int> &mi
     }
     return heap.topk_result(k);
 }
+

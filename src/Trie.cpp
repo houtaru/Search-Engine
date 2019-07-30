@@ -45,7 +45,7 @@ void Trie::AddText(int idText, std::string text) {
         return;
     }
     UsedText[idText] = 0;
-    std::vector<std::string> words = tokenizer(text);
+    std::vector<std::string> words = tokenizer(String::to_lower(text));
     
     for (std::string word : words) {
         Insert(word, idText);
