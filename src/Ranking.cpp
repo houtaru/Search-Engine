@@ -31,6 +31,26 @@ vector<int> Ranking::FullyAppearance(Trie & trie, vector<string> query) {
     return res;
 }
 
+// vector<int> Ranking::FullyAppearance(Trie &trie, vector<string> query) {
+//     if (query.empty())
+//         return vector<int>(0);
+//     const int nText = trie.NumberOfText();
+//     vector<int> result;
+//     vector<int> score_sub(nText);
+//     map<string, int> MAP;
+//     for (auto it : query)
+//         ++MAP[it];
+//     for (auto it : MAP) {
+//         map<int, int> df = trie.Search(it.first);
+//         for (auto i : df) {
+//             ++score_sub[mi.first];
+//             if (score_sub[i.first] == (int)query.size())
+//                 result.push_back(i.first);
+//         }
+//     }
+//     return result;
+// }
+
 
 // Convert all text to a string
 string Ranking::AllText(int idText) {
