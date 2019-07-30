@@ -11,9 +11,9 @@ using namespace std;
 #include <map>
 
 namespace Aho {
-    extern map<string,int> all;
     // Aho-Corasick from SuprDewd
     struct aho_corasick {
+        map<string,int> all;
         struct out_node {
             string keyword; out_node *next;
             inline out_node(string k, out_node *n) : keyword(k), next(n) { }
@@ -29,6 +29,8 @@ namespace Aho {
         aho_corasick(vector<string> keywords);
 
         vector < pair <int, int> >  search(string s);
+        
+        vector < vector <int> > find_position_in(std::string s);
     };
 }
 
