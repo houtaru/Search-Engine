@@ -73,8 +73,8 @@ vector<di> Ranking::output(Trie &trie, vector<string> query, int k, set<int> &mi
     vector<int> number_terms(nText);
     vector<double> score(nText, 0);
     for (auto i : MAP) {
-        double w_tq = weight_query(trie, i.first, i.second);
         string word = i.first;
+        double w_tq = weight_query(trie, i.first, i.second);
         
         map<int, int> df = trie.Search(word);
         
@@ -82,19 +82,40 @@ vector<di> Ranking::output(Trie &trie, vector<string> query, int k, set<int> &mi
         // Case "Manchester United"
         if (i.first[0] == '"' && i.first.back() == '"') {
             if (i.first.size() >= 2) {
-                Aho_Corasick Aho(256);
+                bool check = false;
                 word = i.first.substr(1, i.first.size() - 2);
-                Aho.Insert(word);            
-                df.clear();
-                for (int idText : FullyAppearance(trie, String::split(word))) {
-                    //system(("echo " + std::to_string(idText) + ' ' + std::to_string(0) + " >> log.txt").c_str());
-                    int val = Aho.Value(String::to_lower(AllText(idText)));
-                    if (val) {
-                        //system(("echo " + std::to_string(idText) + ' ' + std::to_string(val) + " >> log.txt").c_str());
-                        df[idText] = val;
+                for (int it = 0; it < (int)word.size(); ++it)
+                    if (word[it] == ' ') {
+                        check = true;
+                        break;
+                    }
+                if (!check) {
+                    for (int it = 0; it < (int)word.size(); ++it) {
+                        int temp = (int)word[it];
+                        if ((temp < 48) || (temp > 57 && temp < 65) || (temp > 90 && temp < 97) || (temp > 122)) {
+                            check = true;
+                            break;
+                        }
                     }
                 }
-                w_tq = nText;
+                if (check) {
+                    Aho_Corasick Aho(256);
+                    Aho.Insert(word);            
+                    df.clear();
+                    for (int idText : FullyAppearance(trie, String::split(word))) {
+                        //system(("echo " + std::to_string(idText) + ' ' + std::to_string(0) + " >> log.txt").c_str());
+                        int val = Aho.Value(String::to_lower(AllText(idText)));
+                        if (val) {
+                            //system(("echo " + std::to_string(idText) + ' ' + std::to_string(val) + " >> log.txt").c_str());
+                            df[idText] = val;
+                        }
+                    }
+                    w_tq = nText;
+                }
+                else {
+                    df = trie.Search(word);
+                    w_tq = weight_query(trie, word, i.second);
+                }
             }
         }
         

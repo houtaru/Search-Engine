@@ -26,6 +26,8 @@ public:
     bool history_scr(string &input_search);
     void main_scr(Trie &trie, Trie& trie_title);
     void loading_scr();
+    vector<string> get_type() {return type;};
+    vector<string> get_name() {return name;};
 };
 
 #endif //__FRONTEND__
