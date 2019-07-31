@@ -184,9 +184,36 @@ void view_document(vector<string> query, string name_document, bool is_intitle) 
         for (int k = 0; k < content[i].size(); ++k) {
             if (std::string("?!.\n").find(content[i][k]) != std::string::npos) is_end_title = true;
 
-            for (auto it : query) if (String::to_lower(content[i].substr(k, it.size())).compare(it) == 0) {
-                nxt[i][k] = max(nxt[i][k], int(it.size() + k));
-                if (is_end_title && is_intitle) nxt[i][k] = 0;
+            for (auto it : query) {
+                if (String::to_lower(content[i].substr(k, it.size())).compare(it) == 0) {
+                    nxt[i][k] = max(nxt[i][k], int(it.size() + k));
+                    if (is_end_title && is_intitle) nxt[i][k] = 0;
+                }
+                // bool ok = true;
+                // if (k + it.size() <= content[i].size()) {
+                //     string ss = content[i].substr(k, it.size());
+                //     string tt = it;
+                //     for (auto jt = ss.begin(); jt != ss.end(); ++jt) {
+                //         while (jt != ss.end() && *jt == ',') ss.erase(jt);
+                //     }
+                //     for (auto jt = tt.begin(); jt != tt.end(); ++jt) {
+                //         while (jt != tt.end() && *jt == ',') tt.erase(jt);
+                //     }
+                    
+                //     if (ss.size() != tt.size()) {
+                //         ok = false;
+                //     } else {
+                //         for (int i = 0; i < (int) ss.size(); ++i) if (!(isdigit(ss[i]) && isdigit(tt[i]) && ss[i] == tt[i])) {
+                //             ok = false;
+                //             break;
+                //         }
+                //     }
+                // } else {
+                //     ok = false;
+                // }
+                // if (ok) {
+                //     nxt[]
+                // }
             }
         }
     }
@@ -305,6 +332,16 @@ void Frontend::search_scr(Trie &trie, string input_search, Trie& trie_title) {
         if (term[0] == '"' && term.back() == '"' && term.size() >= 2) {
             term = term.substr(1, (int)term.size() - 2);
         }
+        //for (auto it = term.begin(); it != term.end(); ++it) if (*it == ',')
+          //  term.erase(it);
+
+        // ofstream fout("log", ios::app);
+        // fout << term << "\n";
+    }
+    auto it = query.begin();
+    while (it != query.end()) {
+        if (it->empty()) query.erase(it);
+        else ++it;
     }
 
     int current_pointer = -1, size = (int)result.size();
@@ -341,7 +378,7 @@ void Frontend::search_scr(Trie &trie, string input_search, Trie& trie_title) {
             ifstream data("TextData2/" + result[i]);
             string st, temp;
             while (data >> temp) {
-                for (char c : temp) if (0 <= c && c < 256) {
+                for (char c : temp) if (0 <= c && c < 256 && (String::isAlNum(c) || c == '$' || c == '#')) {
                     st.push_back(c);
                 }
                 st.push_back(' ');
