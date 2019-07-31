@@ -56,6 +56,8 @@ public:
 
     //Import and Export data of search intitle
     void Intitle();
+
+    void displayText(Node *p, std::string str = "");
 };
 
 class Aho_Corasick {

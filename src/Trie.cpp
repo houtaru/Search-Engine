@@ -285,6 +285,17 @@ void Trie::Intitle() {
     fout.close();
 }
 
+void Trie::displayText(Node *p, std::string str) {
+    if (p == NULL)  return;
+    if (!p->distribution.empty()) {
+        system(("echo " + str + " >> text").c_str());
+    }
+    for (int i = 0; i < nChild; ++i) if (p->child[i] != NULL) {
+        displayText(p->child[i], str + (char)i);
+    }
+}
+
+
 Aho_Corasick::Node::Node() {}
 Aho_Corasick::Node::Node(int nChild, Node * par, int par_id): par(par), par_id(par_id), link(nullptr) {
     child.resize(nChild, nullptr);

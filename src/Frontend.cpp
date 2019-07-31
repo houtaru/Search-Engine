@@ -584,7 +584,8 @@ void get_query(string &input_search, int &current_pointer, int x, int y, int wid
             move(a, b);
         } else if ((temp >= 32 && temp <= 126) && b < y + 75) {    //  User have to input a query with length < 75
             ptr = 0;
-            input_search.push_back((char)temp);
+            input_search += (char)temp;
+            
             if (temp == ' ') {
                 word.clear();
             } else if (temp != '#' && temp != '\"') {

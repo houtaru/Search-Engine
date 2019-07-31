@@ -87,22 +87,24 @@ set<int> Operator::_Minus_Plus(Trie &trie, string s, int k ) {
 void Operator::_Range(vector<string> &query) {
     bool check = false;
     int i, j;
-    vector<int> remove;
+    set<int> remove;
     for (i = 0 ; i < (int)query.size(); ++i) {
         int count_dot = 0;
         for (j = 0; j < query[i].length(); j++) {
             if (query[i][j] == '.')
                 ++count_dot;
             if (count_dot > 2)
-                remove.push_back(i);
+                remove.insert(i);
         }
     }
-    if (!remove.empty()) {
-        for (int i = (int)remove.size()-1; i >=0; --i)
-            query.erase(query.begin() + remove[i]);
-    }
+    // if (!remove.empty()) {
+    //     for (int i = (int)remove.size()-1; i >= 0; --i)
+    //         query.erase(query.begin() + remove[i]);
+    // }
 
     for (i = 0 ; i < (int)query.size(); ++i) {
+        if (remove.find(i) != remove.end())
+            continue;
         for (j = 0; j < query[i].length()-1; j++)
             if (query[i][j] == '.' && query[i][j+1] == '.') {
                 check = true;
