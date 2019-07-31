@@ -13,6 +13,13 @@ Frontend::Frontend() {
             type.push_back(sub.substr(index+1));
     }
     fin.close();
+
+    //  Get history list
+    fin.open("Data/history.data");
+    while (getline(fin, sub)) {
+        history.push_back(sub);
+    }
+    fin.close();
 }
 
 enum {
@@ -128,6 +135,13 @@ void Frontend::draw_logo(int x1, int x2) {  //  x1, x2 is the coordinate accordi
 void clear_scr(int x1, int x2) {    //  Clear row x1 to x2
     for (int i = x1; i <= x2; ++i)
         for (int j = 5; j <= COLS - 5; ++j)
+            mvaddch(i, j, ' ');
+}
+
+
+void clear_scr_sub(int x1, int x2, int y1, int y2) {
+    for (int i = x1; i <= x2; ++i)
+        for (int j = y1; j <= y2; ++j)
             mvaddch(i, j, ' ');
 }
 
@@ -273,7 +287,9 @@ void mouse_search_scr(int &current_pointer, int x, int y, vector<string> result)
 
 void Frontend::search_scr(Trie &trie, string input_search, Trie& trie_title) {
     //Add queries to history
-    system(("echo " + input_search + " >> Data/history.data").c_str());
+    if (history.size() == 10)
+        history.erase(history.begin());
+    history.push_back(input_search);
     
     clear_scr(3, LINES - 3); 
     MEVENT mouse;
@@ -551,6 +567,16 @@ void reset() {
 
 
 enum {
+    HISTORY1,
+    HISTORY2,
+    HISTORY3,
+    HISTORY4,
+    HISTORY5,
+    HISTORY6,
+    HISTORY7,
+    HISTORY8,
+    HISTORY9,
+    HISTORY10,
     CLEAR,
     CLOSE
 };
@@ -566,9 +592,7 @@ void mouse_history_scr(int &current_pointer, int x, int y) {
 }
 
 
-void history(){
-    ifstream fin ; 
-    fin.open("Data/history.data") ;
+bool Frontend::history_scr(string &input_search){
     draw_rectangle(7, 5, LINES-14, 40);
      
     attron(A_BOLD | COLOR_PAIR(MAGENTA));
@@ -580,15 +604,14 @@ void history(){
     mvprintw(LINES-9, 5 + (40+10)/2, "[ CLOSE ]");
     attroff(A_BOLD | COLOR_PAIR(CYAN));
 
-    vector<string> history;
-    string sub;
-    while (getline(fin, sub)) {
-        history.push_back(sub);
-        system(("echo " + sub + " >> log").c_str());
+    for (int i = 0; i < (int)history.size(); ++i) {
+        if ((int)history[i].size() > 31) {
+            string sub = history[i].substr(0, 28);
+            mvprintw(13 + 2*i, 5 + 5, (sub + "...").c_str());
+        }
+        else 
+            mvprintw(13 + 2*i, 5 + 5, history[i].c_str());
     }
-
-    for (int i = 0; i < (int)history.size(); ++i)
-        mvprintw(13 + 2*i, 5 + 5, history[i].c_str());
     
     MEVENT mouse;
     mousemask(ALL_MOUSE_EVENTS, NULL);
@@ -603,7 +626,8 @@ void history(){
                         mouse_history_scr(current_pointer, mouse.y, mouse.x);
                         switch (current_pointer) {
                             case CLEAR: {
-                                system("echo > Data/history.data");
+                                history.clear();
+                                clear_scr_sub(13, LINES-11, 5+5, 5+36);
                                 break;
                             }
                             case CLOSE: {
@@ -611,6 +635,13 @@ void history(){
                                 break;
                             }
                         }
+                        for (int i = HISTORY1; i <= HISTORY10; ++i)
+                            if (!history.empty()) {
+                                if (mouse.y == 13 + 2*i && mouse.x >= 5 + 5 && mouse.x < 5 + 36) {
+                                    input_search = history[i];
+                                    return true;
+                                }
+                            }
                     }
                 }
                 break;
@@ -620,6 +651,7 @@ void history(){
             break;
     }
     clear_scr(7, LINES-7); 
+    return false;
 }
 
 
@@ -661,13 +693,16 @@ void Frontend::main_scr(Trie &trie, Trie& trie_title) {
             }
             goto Loop;
             case SEARCH_BUTTON: {
+                Search:
                 search_scr(trie, input_search, trie_title);
                 current_pointer = SEARCH_BAR;
                 input_search.clear();
                 break;
             }
             case HISTORY: {
-                history();
+                bool check = history_scr(input_search);
+                if (check)
+                    goto Search;
                 current_pointer = SEARCH_BAR;
                 input_search.clear();
                 break;
@@ -683,13 +718,17 @@ void Frontend::main_scr(Trie &trie, Trie& trie_title) {
 
         refresh();
     }
+    ofstream fout("Data/history.data");
+    for (int i = 0; i < (int)history.size(); ++i)
+        fout << history[i] << endl;
+    fout.close();
     endwin();
 }
 
 
 void Frontend::loading_scr() {
     //Clear old history data
-    system("rm -f Data/history.data");
+    //system("rm -f Data/history.data");
 
     //  Initializing for ncurses
     initscr();
